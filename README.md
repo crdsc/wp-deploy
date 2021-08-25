@@ -4,7 +4,10 @@
 Example project to deploy WP to k8s cluster
 
 ------------------------------------------------
+## Plan for deployment
 
+1. Deploy k8s cluster on AWS with KOPS
+2. 
 
 
 

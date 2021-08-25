@@ -2,7 +2,7 @@
 
 pipeline {
 
-    agent { label 'docker-rg' }
+    agent { label 'crdsc-master' }
 
     options {
       timestamps()
@@ -10,11 +10,11 @@ pipeline {
 
     environment {
       //Use Pipeline Utility Steps plugin to read information from pom.xml into env variables
-        IMAGE = 'test-web-app'
-        LIMAGE = 'registry.crdsmart.city/test-web-app'
+        IMAGE = 'wp-mysql-db'
+        LIMAGE = 'registry.crdsmart.city/wp-mysql-db'
         VERSION = "0.${BUILD_NUMBER}"
         TAG = "${BUILD_NUMBER}"
-        NAMESPACE = 'test-web-app'
+        NAMESPACE = 'wp-mysql-db'
         INC="0.1"
     }
 
@@ -22,7 +22,7 @@ pipeline {
 
         stage('Clone source code from GitHub') {
             steps {
-                git url: 'https://github.com/poyaskov/test-web-app.git'
+                git url: 'https://github.com/poyaskov/wp-deploy.git'
             }
         }
 
