@@ -35,13 +35,14 @@ pipeline {
 
         stage('Deploy K8S Cluster to AWS'){
            steps {
-              withAWS(credentials: "{AWS_Jenkins}", region: 'ca-central-1')
+              withAWS(credentials: "{AWS_Jenkins}", region: 'ca-central-1'){
                  sh """
                     ls -l
                     aws configure list
                     echo $KOPS_STATE_STORE
 
                  """
+                 }
            }
         }
         stage('Deploy kubectl and apply kubectl-config to the agent') {
