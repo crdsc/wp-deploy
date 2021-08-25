@@ -20,11 +20,6 @@ pipeline {
 
     stages {
 
-        stage('Clone source code from GitHub') {
-            steps {
-                git url: 'https://github.com/poyaskov/wp-deploy.git'
-            }
-        }
 
         stage('Build and push web-app image to the local registry') {
             steps {
