@@ -35,7 +35,7 @@ pipeline {
 
         stage('Deploy K8S Cluster to AWS'){
            steps {
-              withAWS(credentials: "{AWS_Jenkins}", region: 'ca-central-1') {
+              withAWS(credentials: "${AWS_Jenkins}", region: 'ca-central-1') {
 
                  s3Upload bucket: "my-bucket", path: "foo/text.txt"
 
