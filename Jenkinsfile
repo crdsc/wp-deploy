@@ -2,7 +2,7 @@
 
 pipeline {
 
-    agent { label ${AgentName} }
+    agent { label "${AgentName}" }
 
     options {
       timestamps()
