@@ -37,7 +37,8 @@ pipeline {
            steps {
               withAWS(credentials: 'aws-jenkins-creds', region: 'ca-central-1')
                  sh """
-
+                    ls -l
+                    aws configure list
 
                  """
            }
