@@ -35,7 +35,7 @@ pipeline {
 
         stage('Deploy K8S Cluster to AWS'){
            steps {
-              withAWS(credentials: 'aws-credentials', region: 'ca-central-1')
+              withAWS(credentials: 'aws-jenkins-creds', region: 'ca-central-1')
                  sh """
 
 
