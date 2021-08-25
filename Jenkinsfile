@@ -10,9 +10,9 @@ pipeline {
 
     environment {
       //Use Pipeline Utility Steps plugin to read information from pom.xml into env variables
-        BUILD_NUMBER = '0.1'
+        BUILD_NUMBER = '1'
         IMAGE = 'wp-mysql-db'
-        LIMAGE = 'registry.crdsmart.city/wp-mysql-db'
+        LIMAGE = 'poyaskov/wp-mysql-db'
         VERSION = "0.${BUILD_NUMBER}"
         TAG = "${BUILD_NUMBER}"
         NAMESPACE = 'wp-mysql-db'
