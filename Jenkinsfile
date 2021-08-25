@@ -35,10 +35,11 @@ pipeline {
 
         stage('Deploy K8S Cluster to AWS'){
            steps {
-              sh """
+              withAWS(credentials: 'aws-credentials', region: 'ca-central-1')
+                 sh """
 
 
-              """
+                 """
            }
         }
         stage('Deploy kubectl and apply kubectl-config to the agent') {
