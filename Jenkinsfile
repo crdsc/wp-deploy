@@ -35,13 +35,21 @@ pipeline {
 
         stage('Deploy K8S Cluster to AWS'){
            steps {
-              withAWS(credentials: "${AWS_Jenkins}", region: 'ca-central-1') {
 
-                 s3Upload bucket: "my-bucket", path: "foo/text.txt"
+              withEnv(["AWS_ACCESS_KEY_ID=${env.AWS_ACCESS_KEY_ID}",
+                 "AWS_SECRET_ACCESS_KEY=${env.AWS_SECRET_ACCESS_KEY}",
+                 "AWS_DEFAULT_REGION=${env.AWS_DEFAULT_REGION}"]) {
+                 
+                 sh """
+                    echo $KOPS_STATE_STORE
 
-              }
+
+                 """
+                 
+                 }
            }
         }
+
         stage('Deploy kubectl and apply kubectl-config to the agent') {
             steps {
                 sh """
