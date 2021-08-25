@@ -37,7 +37,7 @@ pipeline {
            steps {
               withAWS(credentials: "{AWS_Jenkins}", region: 'ca-central-1') {
 
-                 s3put -b my-bucket -k foo -p `pwd` text.txt
+                 s3Upload bucket: "my-bucket", path: "foo/text.txt"
 
               }
            }
