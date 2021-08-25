@@ -15,25 +15,32 @@ pipeline {
         LIMAGE = 'poyaskov/wp-mysql-db'
         VERSION = "0.${BUILD_NUMBER}"
         TAG = "${BUILD_NUMBER}"
-        NAMESPACE = 'wp-mysql-db'
         INC="0.1"
     }
 
     stages {
 
 
-        stage('Build and push web-app image to the local registry') {
+        stage('Build MySQL DB image and push to the registry') {
             steps {
                 sh """
                     ls -l
                     docker pull mariadb:latest
-                    docker build -t ${IMAGE} .
+                    docker build --build-arg dummy_pass=$dummy_pass -t ${IMAGE} .
                     docker tag ${IMAGE} ${LIMAGE}:${VERSION}
                     docker push ${LIMAGE}:${VERSION}
                 """
             }
         }
 
+        stage('Deploy K8S Cluster to AWS'){
+           steps {
+              sh """
+
+
+              """
+           }
+        }
         stage('Deploy kubectl and apply kubectl-config to the agent') {
             steps {
                 sh """

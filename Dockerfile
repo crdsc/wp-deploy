@@ -5,8 +5,9 @@ FROM mariadb:latest as builder
 # That file does the DB initialization but also runs mysql daemon, by removing the last line it will only init
 RUN ["sed", "-i", "s/exec \"$@\"/echo \"not running $@\"/", "/usr/local/bin/docker-entrypoint.sh"]
 
+ARG dummy_pass
 # needed for intialization
-ENV MYSQL_ROOT_PASSWORD=passw0rd
+ENV MYSQL_ROOT_PASSWORD=$dummy_pass
 
 COPY ./sql-scripts/ /docker-entrypoint-initdb.d/
 
