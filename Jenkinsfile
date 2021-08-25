@@ -2,7 +2,7 @@
 
 pipeline {
 
-    agent { label 'crdsc-master' }
+    agent { label ${AgentName} }
 
     options {
       timestamps()
