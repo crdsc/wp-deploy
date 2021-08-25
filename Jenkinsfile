@@ -10,6 +10,7 @@ pipeline {
 
     environment {
       //Use Pipeline Utility Steps plugin to read information from pom.xml into env variables
+        BUILD_NUMBER = '0.1'
         IMAGE = 'wp-mysql-db'
         LIMAGE = 'registry.crdsmart.city/wp-mysql-db'
         VERSION = "0.${BUILD_NUMBER}"
@@ -25,8 +26,7 @@ pipeline {
             steps {
                 sh """
                     ls -l
-                    sed -i "/Build/ s/latest/\${BUILD_NUMBER}/" index.html
-                    docker pull ubuntu:18.04
+                    docker pull mariadb:latest
                     docker build -t ${IMAGE} .
                     docker tag ${IMAGE} ${LIMAGE}:${VERSION}
                     docker push ${LIMAGE}:${VERSION}
