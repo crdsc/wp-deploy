@@ -21,28 +21,33 @@ pipeline {
     stages {
 
 
-        stage('Build MySQL DB image and push to the registry') {
-            steps {
-                sh """
-                    ls -l
-                    docker pull mariadb:latest
-                    docker build --build-arg dummy_pass=$dummy_pass -t ${IMAGE} .
-                    docker tag ${IMAGE} ${LIMAGE}:${VERSION}
-                    docker push ${LIMAGE}:${VERSION}
-                """
-            }
-        }
-
         stage('Deploy K8S Cluster to AWS'){
            steps {
-              withAWS(credentials: 'aws-jenkins-creds', region: 'ca-central-1')
-                 sh """
-                    ls -l
-                    aws configure list
 
+
+              withEnv(["AWS_ACCESS_KEY_ID=${env.AWS_ACCESS_KEY_ID}",
+                 "AWS_SECRET_ACCESS_KEY=${env.AWS_SECRET_ACCESS_KEY}",
+                 "AWS_DEFAULT_REGION=${env.AWS_DEFAULT_REGION}"]) {
+                 
+                 sh """
+                    echo $KOPS_STATE_STORE
+                    kops create cluster --name k8s.crdsmartcity.org --zones ca-central-1a --state $KOPS_STATE_STORE --yes
                  """
+              }
+
+              withEnv(["AWS_ACCESS_KEY_ID=${env.AWS_ACCESS_KEY_ID}",
+                 "AWS_SECRET_ACCESS_KEY=${env.AWS_SECRET_ACCESS_KEY}",
+                 "AWS_DEFAULT_REGION=${env.AWS_DEFAULT_REGION}"]) {
+                 
+                 sh """
+                    echo $KOPS_STATE_STORE
+                    kops get k8s.crdsmartcity.org --state=$KOPS_STATE_STORE
+                 """
+              }
+
            }
         }
+
         stage('Deploy kubectl and apply kubectl-config to the agent') {
             steps {
                 sh """
