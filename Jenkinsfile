@@ -36,6 +36,16 @@ pipeline {
         stage('Deploy K8S Cluster to AWS'){
            steps {
 
+
+              withEnv(["KOPS_STATE_STORE=${env.KOPS_STATE_STORE}"]) {
+
+                 sh """
+                    echo $KOPS_STATE_STORE
+                    export CLUSTER_EXIST = `kops get k8s.crdsmartcity.org --state=$KOPS_STATE_STORE`
+                    echo $CLUSTER_EXIST
+                 """
+              }
+
               withEnv(["AWS_ACCESS_KEY_ID=${env.AWS_ACCESS_KEY_ID}",
                  "AWS_SECRET_ACCESS_KEY=${env.AWS_SECRET_ACCESS_KEY}",
                  "AWS_DEFAULT_REGION=${env.AWS_DEFAULT_REGION}"]) {
