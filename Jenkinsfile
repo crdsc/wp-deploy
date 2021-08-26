@@ -6,16 +6,6 @@ pipeline {
       timestamps()
     }
 
-    environment {
-      //Use Pipeline Utility Steps plugin to read information from pom.xml into env variables
-        BUILD_NUMBER = '1'
-        IMAGE = 'wp-mysql-db'
-        LIMAGE = 'poyaskov/wp-mysql-db'
-        VERSION = "0.${BUILD_NUMBER}"
-        TAG = "${BUILD_NUMBER}"
-        INC="0.1"
-    }
-
     stages {
 
 
@@ -31,48 +21,12 @@ pipeline {
             }
         }
 
-        stage('Deploy K8S Cluster to AWS'){
-           steps {
-
-
-              withEnv(['KOPS_STATE_STORE=s3://k8s-crdsc-org']) {
-
-                 sh """
-                    echo $KOPS_STATE_STORE
-                    // kops get k8s.crdsmartcity.org --state=$KOPS_STATE_STORE
-                    CLUSTER_STATE=`kops get k8s.crdsmartcity.org --state=s3://k8s-crdsc-org`
-                 """
-              }
-
-              withEnv(["AWS_ACCESS_KEY_ID=${env.AWS_ACCESS_KEY_ID}",
-                 "AWS_SECRET_ACCESS_KEY=${env.AWS_SECRET_ACCESS_KEY}",
-                 "AWS_DEFAULT_REGION=${env.AWS_DEFAULT_REGION}"]) {
-                 
-                 sh """
-                    echo $KOPS_STATE_STORE
-                    kops create cluster --name k8s.crdsmartcity.org --zones ca-central-1a --state $KOPS_STATE_STORE --yes
-                 """
-              }
-
-              withEnv(["AWS_ACCESS_KEY_ID=${env.AWS_ACCESS_KEY_ID}",
-                 "AWS_SECRET_ACCESS_KEY=${env.AWS_SECRET_ACCESS_KEY}",
-                 "AWS_DEFAULT_REGION=${env.AWS_DEFAULT_REGION}"]) {
-                 
-                 sh """
-                    echo $KOPS_STATE_STORE
-                    kops get k8s.crdsmartcity.org --state=$KOPS_STATE_STORE
-                 """
-              }
-
-           }
-        }
-
         stage('Deploy kubectl and apply kubectl-config to the agent') {
             steps {
                 sh """
                     sudo apt-get update && sudo apt-get install -y kubectl
                     mkdir -p ~/.kube/
-                    scp vadim@158.50.25.21:~/.kube/config ~/.kube/
+                    scp "${KubeConfigSafe}":~/.kube/config ~/.kube/
                     kubectl get nodes
                 """
             }
