@@ -42,11 +42,20 @@ pipeline {
                  
                  sh """
                     echo $KOPS_STATE_STORE
-
-
+                    kops create cluster --name k8s.crdsmartcity.org --zones ca-central-1a --state $KOPS_STATE_STORE --yes
                  """
+              }
+
+              withEnv(["AWS_ACCESS_KEY_ID=${env.AWS_ACCESS_KEY_ID}",
+                 "AWS_SECRET_ACCESS_KEY=${env.AWS_SECRET_ACCESS_KEY}",
+                 "AWS_DEFAULT_REGION=${env.AWS_DEFAULT_REGION}"]) {
                  
-                 }
+                 sh """
+                    echo $KOPS_STATE_STORE
+                    kops get k8s.crdsmartcity.org --state=$KOPS_STATE_STORE
+                 """
+              }
+
            }
         }
 
