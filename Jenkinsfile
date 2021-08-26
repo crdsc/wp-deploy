@@ -41,8 +41,7 @@ pipeline {
 
                  sh """
                     echo $KOPS_STATE_STORE
-                    CLUSTER_EXIST = `kops get k8s.crdsmartcity.org --state=$KOPS_STATE_STORE`
-                    echo $CLUSTER_EXIST
+                    kops get k8s.crdsmartcity.org --state=$KOPS_STATE_STORE
                  """
               }
 
