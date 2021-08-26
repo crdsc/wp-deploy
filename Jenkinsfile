@@ -33,17 +33,17 @@ pipeline {
             }
         }
 
-        stage('Deploy new image to k8s cluster') {
+        stage('Deploy MySQL image to k8s cluster') {
             steps {
                 sh """
-                    sed -i "/image/ s/latest/\${VERSION}/" files/test-webapp-deploy.yaml
-                    kubectl -n \${NAMESPACE} apply -f files/test-webapp-deploy.yaml
+                    sed -i "/image/ s/latest/\${VERSION}/" k8s-deployment/mysql/mysql-deploy.yaml
+                    kubectl -n \${NAMESPACE} apply -f k8s-deployment/mysql/mysql-deploy.yaml
                     kubectl -n \${NAMESPACE} get pod |grep -v NAME | awk '{ print \$1 }'| xargs -i kubectl -n \${NAMESPACE} delete pod {}
                 """
             }
         }
 
-        stage('Test k8s web-app pod status') {
+        stage('Test WP MySQL pod status') {
             steps {
                 sh """
                     kubectl -n ${NAMESPACE} get pod
