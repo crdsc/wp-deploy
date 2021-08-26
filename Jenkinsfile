@@ -1,5 +1,3 @@
-// Jenkinsfile for WP deploy
-
 pipeline {
 
     agent { label "${AgentName}" }
