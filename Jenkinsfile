@@ -45,6 +45,7 @@ pipeline {
                        then
                          echo "MySQL Secrey Already exists."
                        else
+                         echo "Create k8s secret from literal"
                          kubectl -n $DBNAMESPACE create secret generic mysql-pass --from-literal=password=$dummy_pass
                     fi
                 '''
