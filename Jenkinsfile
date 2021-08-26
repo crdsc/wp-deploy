@@ -65,11 +65,12 @@ pipeline {
             steps {
                 sh '''
                     DB_STATE=""
-                    DB_STATE=`kubectl -n ${DBNAMESPACE} get podi -l app=mysql -o jsonpath='{.items[*].status.containerStatuses[0].ready}'`
+                    DB_STATE=`kubectl -n ${DBNAMESPACE} get pod -l app=mysql -o jsonpath='{.items[*].status.containerStatuses[0].ready}'`
                     WP_STATE="`kubectl -n ${NAMESPACE} get pod -l app=wordpress -o jsonpath='{.items[*].status.containerStatuses[0].ready}'`"
-                    #if ! "${DB_STATE}" 
-                    #   then echo "DB MySQL deployed with errors"
-                    #fi
+                    
+                    if [! $DB_STATE ] 
+                       then echo "DB MySQL deployed with errors"
+                    fi
                 '''
             }
         }
