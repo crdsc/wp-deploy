@@ -45,7 +45,7 @@ pipeline {
                        then
                          echo "MySQL Secrey Already exists."
                        else
-                         kubectl -n wp-test create secret generic mysql-pass --from-literal=password=$dummy_pass
+                         kubectl -n $DBNAMESPACE create secret generic mysql-pass --from-literal=password=$dummy_pass
                     fi
                 '''
             }
