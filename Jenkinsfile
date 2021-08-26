@@ -37,11 +37,11 @@ pipeline {
            steps {
 
 
-              withEnv(["KOPS_STATE_STORE=${env.KOPS_STATE_STORE}"]) {
+              withEnv(['KOPS_STATE_STORE=s3://k8s-crdsc-org']) {
 
                  sh """
                     echo $KOPS_STATE_STORE
-                    export CLUSTER_EXIST = `kops get k8s.crdsmartcity.org --state=$KOPS_STATE_STORE`
+                    CLUSTER_EXIST = `kops get k8s.crdsmartcity.org --state=$KOPS_STATE_STORE`
                     echo $CLUSTER_EXIST
                  """
               }
