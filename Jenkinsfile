@@ -38,8 +38,11 @@ pipeline {
                     sed -i "/image/ s/latest/\${VERSION}/" k8s-deployment/mysql/mysql-deploy.yaml
                     kubectl -n \${DBNAMESPACE} apply -f k8s-deployment/mysql/mysql-deploy.yaml
                     kubectl -n \${DBNAMESPACE} get pod |grep -v NAME | awk '{ print \$1 }'| xargs -i kubectl -n \${DBNAMESPACE} delete pod {}
+                    SECRET_STATE=`kubectl -n wp-test get secret mysql-passs o jsonpath={.data.password} 2>/dev/null`
                 """
-                sh('kubectl -n wp-test create secret generic mysql-pass --from-literal=password=$dummy_pass')
+                sh('
+                kubectl -n wp-test create secret generic mysql-pass --from-literal=password=$dummy_pass
+                ')
             }
         }
 
