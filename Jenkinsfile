@@ -11,13 +11,11 @@ pipeline {
 
         stage('Build MySQL DB image and push to the registry') {
             steps {
-                sh ('
-                    ls -l
-                    docker pull mariadb:latest
-                    docker build --build-arg dummy_pass=$dummy_pass -t ${IMAGE} .
-                    docker tag ${IMAGE} ${LIMAGE}:${VERSION}
-                    docker push ${LIMAGE}:${VERSION}
-                ')
+                sh('ls -l')
+                sh('docker pull mariadb:latest')
+                sh('docker build --build-arg dummy_pass=$dummy_pass -t ${IMAGE} .')
+                sh('docker tag ${IMAGE} ${LIMAGE}:${VERSION}')
+                sh('docker push ${LIMAGE}:${VERSION}')
                 //sh('curl -u $EXAMPLE_CREDS_USR:$EXAMPLE_CREDS_PSW https://example.com/')
             }
         }
@@ -41,7 +39,7 @@ pipeline {
                     kubectl -n \${DBNAMESPACE} apply -f k8s-deployment/mysql/mysql-deploy.yaml
                     kubectl -n \${DBNAMESPACE} get pod |grep -v NAME | awk '{ print \$1 }'| xargs -i kubectl -n \${DBNAMESPACE} delete pod {}
                 """
-                sh('kubectl -n wp-test create secret generic mysql-pass --from-literal=password="dummy_pass')
+                sh('kubectl -n wp-test create secret generic mysql-pass --from-literal=password=$dummy_pass')
             }
         }
 
