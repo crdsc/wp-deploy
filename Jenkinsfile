@@ -37,16 +37,30 @@ pipeline {
             steps {
                 sh """
                     sed -i "/image/ s/latest/\${VERSION}/" k8s-deployment/mysql/mysql-deploy.yaml
-                    kubectl -n \${NAMESPACE} apply -f k8s-deployment/mysql/mysql-deploy.yaml
+                    kubectl -n \${DBNAMESPACE} apply -f k8s-deployment/mysql/mysql-deploy.yaml
+                    kubectl -n \${DBNAMESPACE} get pod |grep -v NAME | awk '{ print \$1 }'| xargs -i kubectl -n \${DBNAMESPACE} delete pod {}
+                """
+            }
+        }
+
+        stage('Deploy WP image to k8s cluster') {
+            steps {
+                sh """
+                    sed -i "/image/ s/latest/\${VERSION}/" k8s-deployment/wp-app/wordpress-deployment.yaml
+                    kubectl -n \${NAMESPACE} apply -f k8s-deployment/wp-app/wordpress-deployment.yaml
                     kubectl -n \${NAMESPACE} get pod |grep -v NAME | awk '{ print \$1 }'| xargs -i kubectl -n \${NAMESPACE} delete pod {}
                 """
             }
         }
 
-        stage('Test WP MySQL pod status') {
+        stage('Check WP MySQL pod status') {
             steps {
                 sh """
-                    kubectl -n ${NAMESPACE} get pod
+                    DB_STATE="`kubectl -n ${DBNAMESPACE} get podi -l app=mysql -o jsonpath='{.items[*].status.containerStatuses[0].ready}'`"
+                    WP_STATE="`kubectl -n ${NAMESPACE} get pod -l app=wordpress -o jsonpath='{.items[*].status.containerStatuses[0].ready}'`"
+                    if ! "${DB_STATE}" 
+                       then echo "DB MySQL deployed with errors"
+                    fi
                 """
             }
         }
