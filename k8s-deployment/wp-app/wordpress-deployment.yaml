@@ -76,3 +76,4 @@ spec:
       - name: wordpress-persistent-storage
         persistentVolumeClaim:
           claimName: gp2-wp-pvc
+
