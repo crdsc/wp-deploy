@@ -28,14 +28,14 @@ spec:
         - name: MYSQL_PASSWORD
           valueFrom:
             secretKeyRef:
-              key: password.txt
+              key: password
               name: mysql-pass
         - name: MYSQL_DATABASE
           value: pxdemo
         - name: MYSQL_ROOT_PASSWORD
           valueFrom:
             secretKeyRef:
-              key: password.txt
+              key: password
               name: mysql-pass
         image: poyaskov/wp-mysql-db:0.1
         imagePullPolicy: IfNotPresent
