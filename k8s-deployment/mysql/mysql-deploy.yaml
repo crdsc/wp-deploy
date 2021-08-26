@@ -1,4 +1,10 @@
 ---
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+  name: databases
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -38,8 +44,6 @@ spec:
         - containerPort: 3306
           protocol: TCP
         resources: {}
-        terminationMessagePath: /dev/termination-log
-        terminationMessagePolicy: File
         volumeMounts:
         - mountPath: /var/lib/mysql
           name: mysql
@@ -49,12 +53,12 @@ spec:
       volumes:
       - name: mysql
         persistentVolumeClaim:
-          claimName: px-mysql-pvc
+          claimName: gp2-mysql-pvc
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: px-mysql-pvc
+  name: gp2-mysql-pvc
   labels:
     app: mysql
 spec:
