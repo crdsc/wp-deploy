@@ -24,6 +24,7 @@ pipeline {
         stage('Deploy kubectl and apply kubectl-config to the agent') {
             steps {
                 sh """
+                    hostname
                     sudo apt-get update && sudo apt-get install -y kubectl
                     mkdir -p ~/.kube/
                     scp "${KubeConfigSafe}":~/.kube/config ~/.kube/
