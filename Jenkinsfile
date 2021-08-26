@@ -11,37 +11,44 @@ pipeline {
 
         stage('Build MySQL DB image and push to the registry') {
             steps {
-                sh('ls -l')
-                sh('docker pull mariadb:latest')
-                sh('docker build --build-arg dummy_pass=$dummy_pass -t $IMAGE .')
-                sh('docker tag $IMAGE $LIMAGE:$VERSION')
-                sh('docker push $LIMAGE:$VERSION')
+                sh '''
+                ls -l
+                docker pull mariadb:latest
+                docker build --build-arg dummy_pass=$dummy_pass -t $IMAGE .
+                docker tag $IMAGE $LIMAGE:$VERSION
+                docker push $LIMAGE:$VERSION
+
                 //sh('curl -u $EXAMPLE_CREDS_USR:$EXAMPLE_CREDS_PSW https://example.com/')
+                '''
             }
         }
 
         stage('Deploy kubectl and apply kubectl-config to the agent') {
             steps {
-                sh """
+                sh '''
                     hostname
-                    sudo apt-get update && sudo apt-get install -y kubectl
+                    sudo apt-get update -y && sudo apt-get install -y kubectl
                     mkdir -p ~/.kube/
                     scp "${KubeConfigSafe}":~/.kube/config ~/.kube/
                     kubectl get nodes
-                """
+                '''
             }
         }
 
         stage('Deploy MySQL image to k8s cluster') {
             steps {
-                sh """
+                sh '''
                     sed -i "/image/ s/latest/\${VERSION}/" k8s-deployment/mysql/mysql-deploy.yaml
                     kubectl -n \${DBNAMESPACE} apply -f k8s-deployment/mysql/mysql-deploy.yaml
                     kubectl -n \${DBNAMESPACE} get pod |grep -v NAME | awk '{ print \$1 }'| xargs -i kubectl -n \${DBNAMESPACE} delete pod {}
-                    SECRET_STATE=`kubectl -n wp-test get secret mysql-passs o jsonpath={.data.password} 2>/dev/null`
-                """
-                sh '''
-                kubectl -n wp-test create secret generic mysql-pass --from-literal=password=$dummy_pass
+                    SECRET_STATE=`kubectl -n wp-test get secret mysql-pass o jsonpath={.data.password} 2>/dev/null`
+                    
+                    if [ ! $SECRET_STATE ]
+                       then
+                         echo "MySQL Secrey Already exists."
+                       else
+                         kubectl -n wp-test create secret generic mysql-pass --from-literal=password=$dummy_pass
+                    fi
                 '''
             }
         }
