@@ -17,8 +17,6 @@ pipeline {
                 docker build --build-arg dummy_pass=$dummy_pass -t $IMAGE .
                 docker tag $IMAGE $LIMAGE:$VERSION
                 docker push $LIMAGE:$VERSION
-
-                //sh('curl -u $EXAMPLE_CREDS_USR:$EXAMPLE_CREDS_PSW https://example.com/')
                 '''
             }
         }
