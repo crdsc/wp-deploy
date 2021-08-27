@@ -1,0 +1,5 @@
+CREATE DATABASE wpdbtest;
+
+GRANT ALL PRIVILEGES ON wpdbtest.* TO "wpadmin"@"%" IDENTIFIED BY "password";
+
+FLUSH PRIVILEGES;
