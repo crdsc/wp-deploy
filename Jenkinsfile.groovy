@@ -2,11 +2,30 @@
 
 import groovy.transform.Field
 
-def testStageDefinition
+
+/**
+ * Docker image Build and Deploy pipeline
+ * IMAGE_NAME - Image name
+ * IMAGE_GIT_URL - Image git repo URL
+ * IMAGE_BRANCH - Image repo branch
+ * IMAGE_CREDENTIALS_ID - Image repo credentials id
+ * IMAGE_TAGS - Image tags
+ * DOCKERFILE_PATH - Relative path to docker file in image repo
+ * REGISTRY_URL - Docker registry URL (can be empty)
+ * ARTIFACTORY_NAMESPACE - Artifactory namespace (oss, cicd,...)
+ * UPLOAD_TO_DOCKER_HUB    - True\False
+ * REGISTRY_CREDENTIALS_ID - Docker hub credentials id
+ *
+ **/
 
 @Field String SCRIPT_PATH = 'digital-path-automation'
 @Field final String ansibleActions = 'ansibleChecks.groovy'
 @Field final String properties = 'Config/Prechecks_properties'
+
+def common = new com.mirantis.mk.Common()
+def gerrit = new com.mirantis.mk.Gerrit()
+def git = new com.mirantis.mk.Git()
+def dockerLib = new com.mirantis.mk.Docker()
 
 def stCredentials(){
     mysqlCred = env.DBUserName
