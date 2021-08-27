@@ -57,14 +57,14 @@ stage("Checkout Code from GitHub"){
            echo '[Pipeline][INFO] Checkout Code from GitHub...'
            stCredentials()
            validateInputs()
-           checkout scm
+           // checkout scm
             
         }
     }
 }
 
 stage("Build MyQSL Image"){
-    node('docker-rg'){
+    node("${env.NodeName}"){
         wrap([$class: 'AnsiColorBuildWrapper']){
            withCredentials(){
               echo '[Pipeline][INFO] Stage Two ...'
@@ -82,7 +82,7 @@ stage("Build MyQSL Image"){
 }
 
 stage("Stage 3"){
-    node('docker-rg'){
+    node("${env.NodeName}"){
     ansiColor('xterm'){
         echo '[Pipeline][INFO] Stage Three ...'
         echo '\033[34mHello\033[0m \033[33mcolorful\033[0m \033[35mworld!\033[0m'
