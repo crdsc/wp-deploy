@@ -58,20 +58,24 @@ stage("Checkout Code from GitHub"){
            stCredentials()
            validateInputs()
            checkout scm
-//           checkout changelog: false; pool: false; scm: [$class: 'GitSCM', branches: [[name: main]], url: 'https://github.com/poyaskov/wp-deploy.git', credentialsId: 'poyaskov_github_pt']
-                  
+            
         }
     }
 }
 
-stage("Stage 2"){
+stage("Build MyQSL Image"){
     node('docker-rg'){
         wrap([$class: 'AnsiColorBuildWrapper']){
-           echo '[Pipeline][INFO] Stage Two ...'
-           echo '\033 Hello \033 \033[33mcolorful\033[0m \033 world! \033'
-           echo "\u001b Please enter DB user name\u001b"
-           ansiColor('xterm') {
-           echo '\033[42m\033[97mWhite letters, green background\033[0m'
+           withCredentials(){
+              echo '[Pipeline][INFO] Stage Two ...'
+              echo '\033 Hello \033 \033[33mcolorful\033[0m \033 world! \033'
+              echo "\u001b Please enter DB user name\u001b"
+
+              buildCustomMySQLImage()
+
+              ansiColor('xterm') {
+              echo '\033[42m\033[97mWhite letters, green background\033[0m'
+             }
            }
         }
     }
