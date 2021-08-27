@@ -52,7 +52,7 @@ def buildCustomMySQLImage(){
 }
 
 stage("Checkout Code from GitHub"){
-    node('docker-rg'){
+    node('"${NodeName}"'){
         wrap([$class: 'AnsiColorBuildWrapper']){
            echo '[Pipeline][INFO] Checkout Code from GitHub...'
            stCredentials()
