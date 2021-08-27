@@ -33,8 +33,7 @@ stage("Checkout Code from GitHub"){
            echo '[Pipeline][INFO] Checkout Code from GitHub...'
            stCredentials()
            validateInputs()
-           checkout changelog: false; pool: false; scm: [$class: 'GitSCM', branches: [[name: main]], url: 'https://github.com/poyaskov/wp-deploy.git', credentialsId: 'poyaskov_github_pt']
-//           checkout changelog: false; pool: false; scm: [$class: 'MercurialSCM', source: 'https://github.com/poyaskov/wp-deploy.git', clean: true, credentialsId: 'poyaskov_github_pt']
+//           checkout changelog: false; pool: false; scm: [$class: 'GitSCM', branches: [[name: main]], url: 'https://github.com/poyaskov/wp-deploy.git', credentialsId: 'poyaskov_github_pt']
                   
         }
     }
