@@ -43,7 +43,7 @@ def validateInputs(){
 
 def buildCustomMySQLImage(){
     wrap([$class: 'AnsiColorBuildWrapper']){
-       withEnv(['IMAGE:' + IMAGE, 'RepoImageName:' + LIMAGE, 'VERSION:' + VERSION]){
+       withEnv(['IMAGE+' + IMAGE, 'RepoImageName=' + LIMAGE, 'VERSION=' + VERSION]){
        echo "buildCustomMySQLImage function"
 
        sh 'ls -l'
