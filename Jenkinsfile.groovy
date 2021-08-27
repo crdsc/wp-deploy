@@ -41,6 +41,15 @@ def validateInputs(){
     
 }
 
+def buildCustomMySQLImage(){
+    wrap([$class: 'AnsiColorBuildWrapper']){
+       withEnv(['KubeConfigSafe=' + KubeConfigSafe, ]){
+       echo "buildCustomMySQLImage function"
+
+       
+       }
+   }
+}
 
 stage("Checkout Code from GitHub"){
     node('docker-rg'){
