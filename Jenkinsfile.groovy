@@ -66,7 +66,7 @@ stage("Checkout Code from GitHub"){
 stage("Build MyQSL Image"){
     node("${env.NodeName}"){
         wrap([$class: 'AnsiColorBuildWrapper']){
-           withCredentials(){
+           withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'mysqldbconnect', usernameVariable: 'DBUserName', passwordVariable: 'DBPassword']]){
               echo '[Pipeline][INFO] Stage Two ...'
               echo '\033 Hello \033 \033[33mcolorful\033[0m \033 world! \033'
               echo "\u001b Please enter DB user name\u001b"
