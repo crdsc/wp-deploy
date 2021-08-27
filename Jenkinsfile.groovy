@@ -22,10 +22,6 @@ import groovy.transform.Field
 @Field final String ansibleActions = 'ansibleChecks.groovy'
 @Field final String properties = 'Config/Prechecks_properties'
 
-def common = new com.mirantis.mk.Common()
-def gerrit = new com.mirantis.mk.Gerrit()
-def git = new com.mirantis.mk.Git()
-def dockerLib = new com.mirantis.mk.Docker()
 
 def stCredentials(){
     mysqlCred = env.DBUserName
@@ -52,6 +48,7 @@ stage("Checkout Code from GitHub"){
            echo '[Pipeline][INFO] Checkout Code from GitHub...'
            stCredentials()
            validateInputs()
+           checkout scm
 //           checkout changelog: false; pool: false; scm: [$class: 'GitSCM', branches: [[name: main]], url: 'https://github.com/poyaskov/wp-deploy.git', credentialsId: 'poyaskov_github_pt']
                   
         }
