@@ -43,8 +43,14 @@ def validateInputs(){
 
 def buildCustomMySQLImage(){
     wrap([$class: 'AnsiColorBuildWrapper']){
-       withEnv(['KubeConfigSafe=' + KubeConfigSafe, ]){
+       withEnv(['IMAGE:' + IMAGE, 'RepoImageName:' + LIMAGE, 'VERSION:' + VERSION]){
        echo "buildCustomMySQLImage function"
+
+       sh 'ls -l'
+       sh 'docker pull mariadb:latest'
+       sh 'docker build --build-arg dummy_pass=$dummy_pass -t $IMAGE .'
+       sh 'docker tag $IMAGE $LIMAGE:$VERSION'
+       sh 'docker push $LIMAGE:$VERSION'
 
        
        }
@@ -68,13 +74,11 @@ stage("Build MyQSL Image"){
         wrap([$class: 'AnsiColorBuildWrapper']){
            withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'mysqldbconnect', usernameVariable: 'DBUserName', passwordVariable: 'DBPassword']]){
               echo '[Pipeline][INFO] Stage Two ...'
-              echo '\033 Hello \033 \033[33mcolorful\033[0m \033 world! \033'
-              echo "\u001b Please enter DB user name\u001b"
 
               buildCustomMySQLImage()
 
               ansiColor('xterm') {
-              echo '\033[42m\033[97mWhite letters, green background\033[0m'
+              echo '\033[42m\033[97mThis stage building MariaDB image uand pushing it to the DockerHub\033[0m'
              }
            }
         }
