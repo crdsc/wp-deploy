@@ -114,7 +114,7 @@ stage("Deploy MySQL DB"){
 
 
 
-       //      deployMySQLDB()
+             deployMySQLDB()
 
 
           }
