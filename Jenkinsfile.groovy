@@ -63,6 +63,19 @@ def buildCustomMySQLImage(){
    }
 }
 
+def deployMySQLDB(){
+    wrap([$class: 'AnsiColorBuildWrapper']){
+       withEnv(['IMAGE=' + IMAGE, 'RepoImageName=' + LIMAGE, 'VERSION=' + VERSION]){
+          withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'mysqldbconnect', usernameVariable: 'DBUserName', passwordVariable: 'DBPassword']]){
+
+             println( "Stage DeployMySQL DB")
+
+
+          }
+       }
+   }
+}
+
 stage("Build MyQSL Image"){
     node("${env.NodeName}"){
         wrap([$class: 'AnsiColorBuildWrapper']){
@@ -92,7 +105,7 @@ stage("Kubectl config"){
        sh 'echo ${Password} | sudo -S apt-get update -y && sudo apt-get install -y kubectl'
        sh 'mkdir -p ~/.kube/'
        sh script: "scp ${KubeConfigSafe}:~/.kube/config ~/.kube/"
-       sh 'kubectl get nodes'
+       //sh 'kubectl get nodes'
 
        ansiColor('xterm'){
            echo '\033[42m\033[97mkubectl deplyed abd configured\033[0m'
@@ -100,3 +113,24 @@ stage("Kubectl config"){
        }
     }
 }
+
+stage("Deploy MySQL DB"){
+    wrap([$class: 'AnsiColorBuildWrapper']){
+       withEnv(['KubeConfigSafe=k8s-master-1.crdsmart.city', 'RepoImageName=' + LIMAGE, 'VERSION=' + VERSION]){
+          withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'mysqldbconnect', usernameVariable: 'DBUserName', passwordVariable: 'DBPassword']]){
+
+             echo '[Pipeline][INFO] Deploy MySQL(MariaDB) to the k8s Cluster...'
+
+             sh script: "scp ${KubeConfigSafe}:~/.kube/config ~/.kube/"
+             sh 'kubectl get nodes'
+
+
+
+             deployMySQLDB()
+
+
+          }
+       }
+   }
+}
+
