@@ -43,34 +43,26 @@ def validateInputs(){
 }
 
 def buildCustomMySQLImage(){
-    wrap([$class: 'AnsiColorBuildWrapper']){
-       withEnv(['IMAGE=' + IMAGE, 'RepoImageName=' + LIMAGE, 'VERSION=' + VERSION]){
-          withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'mysqldbconnect', usernameVariable: 'DBUserName', passwordVariable: 'DBPassword']]){
+    withEnv(['IMAGE=' + IMAGE, 'RepoImageName=' + LIMAGE, 'VERSION=' + VERSION]){
+       withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'mysqldbconnect', usernameVariable: 'DBUserName', passwordVariable: 'DBPassword']]){
 
-          echo "buildCustomMySQLImage function"
+       sh returnStdout: true, script: "sed -i 's/dummydb/wpdbtest/g; s/dummyuser/${DBUserName}/g; s/dummypass/${DBPassword}/g' sql-scripts/dbcreate.sql"
 
-          sh returnStdout: true, script: "sed -i 's/dummydb/wpdbtest/g; s/dummyuser/${DBUserName}/g; s/dummypass/${DBPassword}/g' sql-scripts/dbcreate.sql"
-
-          //sh 'ls -l'
-          sh 'docker pull mariadb:10.6.4'
-          sh returnStdout: true, script: "docker build --build-arg dummy_pass=${DBPassword} -t $IMAGE ."
-          sh 'docker tag $IMAGE $LIMAGE:$VERSION'
-          sh 'docker push $LIMAGE:$VERSION'
+       sh 'docker pull mariadb:10.6.4'
+       sh returnStdout: true, script: "docker build --build-arg dummy_pass=${DBPassword} -t $IMAGE ."
+       sh 'docker tag $IMAGE $LIMAGE:$VERSION'
+       sh 'docker push $LIMAGE:$VERSION'
 
 
-          }       
        }
    }
 }
 
 def deployMySQLDB(){
-    wrap([$class: 'AnsiColorBuildWrapper']){
-       withEnv(['IMAGE=' + IMAGE, 'RepoImageName=' + LIMAGE, 'VERSION=' + VERSION]){
-          withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'mysqldbconnect', usernameVariable: 'DBUserName', passwordVariable: 'DBPassword']]){
+    withEnv(['IMAGE=' + IMAGE, 'RepoImageName=' + LIMAGE, 'VERSION=' + VERSION]){
+       withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'mysqldbconnect', usernameVariable: 'DBUserName', passwordVariable: 'DBPassword']]){
 
-             ansiColor('vga') {
-                echo '\033[42m\033[97mWhite letters, green background\033[0m'
-             }
+          ansiColor('vga') {
              echo '\033[42m\033[97mkubectl deplyed and configured\033[0m'
              echo "\033[34m Blue \033[0m"
           }
@@ -89,7 +81,7 @@ stage("Build MyQSL Image"){
               
               buildCustomMySQLImage()
 
-              echo '\033[34mThis stage building MariaDB image uand pushing it to the DockerHub\033[0m'
+              echo '\033[34mThis stage building MariaDB image and pushing it to the DockerHub\033[0m'
         }
     }
 }
