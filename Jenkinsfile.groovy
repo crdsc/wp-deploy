@@ -44,15 +44,19 @@ def validateInputs(){
 def buildCustomMySQLImage(dummy_pass){
     wrap([$class: 'AnsiColorBuildWrapper']){
        withEnv(['IMAGE=' + IMAGE, 'RepoImageName=' + LIMAGE, 'VERSION=' + VERSION]){
-       echo "buildCustomMySQLImage function"
+          withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'mysqldbconnect', usernameVariable: 'DBUserName', passwordVariable: 'DBPassword']]){
 
-       sh 'ls -l'
-       sh 'docker pull mariadb:latest'
-       sh 'docker build --build-arg dummy_pass=$dummy_pass -t $IMAGE .'
-       sh 'docker tag $IMAGE $LIMAGE:$VERSION'
-       sh 'docker push $LIMAGE:$VERSION'
+          echo "buildCustomMySQLImage function"
 
-       
+          //sh 'ls -l'
+          sh 'docker pull mariadb:latest'
+          sh returnStdOut: true, script: "docker build --build-arg dummy_pass=${DBPassword} -t $IMAGE ."
+          sh 'docker build --build-arg dummy_pass=${dummy_pass} -t $IMAGE .'
+          sh 'docker tag $IMAGE $LIMAGE:$VERSION'
+          sh 'docker push $LIMAGE:$VERSION'
+
+
+          }       
        }
    }
 }
@@ -60,7 +64,6 @@ def buildCustomMySQLImage(dummy_pass){
 stage("Build MyQSL Image"){
     node("${env.NodeName}"){
         wrap([$class: 'AnsiColorBuildWrapper']){
-           withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'mysqldbconnect', usernameVariable: 'DBUserName', passwordVariable: 'DBPassword']]){
 
               echo '[Pipeline][INFO] Checkout Code from GitHub...'
               stCredentials()
@@ -69,12 +72,11 @@ stage("Build MyQSL Image"){
               
               echo '[Pipeline][INFO] Building Docker Image ...'
 
-              buildCustomMySQLImage("${DBPassword}")
+              buildCustomMySQLImage()
 
               ansiColor('xterm') {
               echo '\033[42m\033[97mThis stage building MariaDB image uand pushing it to the DockerHub\033[0m'
              }
-           }
         }
     }
 }
