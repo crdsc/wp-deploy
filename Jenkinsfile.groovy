@@ -57,23 +57,17 @@ def buildCustomMySQLImage(){
    }
 }
 
-stage("Checkout Code from GitHub"){
-    node("${env.NodeName}"){
-        wrap([$class: 'AnsiColorBuildWrapper']){
-           echo '[Pipeline][INFO] Checkout Code from GitHub...'
-           stCredentials()
-           validateInputs()
-           // checkout scm
-            
-        }
-    }
-}
-
 stage("Build MyQSL Image"){
     node("${env.NodeName}"){
         wrap([$class: 'AnsiColorBuildWrapper']){
            withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'mysqldbconnect', usernameVariable: 'DBUserName', passwordVariable: 'DBPassword']]){
-              echo '[Pipeline][INFO] Stage Two ...'
+
+              echo '[Pipeline][INFO] Checkout Code from GitHub...'
+              stCredentials()
+              validateInputs()
+              checkout scm
+              
+              echo '[Pipeline][INFO] Building Docker Image ...'
 
               buildCustomMySQLImage()
 
