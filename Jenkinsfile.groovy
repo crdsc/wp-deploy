@@ -68,13 +68,14 @@ def deployMySQLDB(){
              
              //sh returnStdout: true, script: "kubectl -n $DB_Namespace create secret generic mysql-wp-pass --from-literal=username=$DBUserName --from-literal=password=$DBPassword"
              
-             sh returnStdout: true, script: 'kubectl -n $DB_Namespace apply -f k8s-deployment/mysql/mysql-deploy.yaml'
+             //sh returnStdout: true, script: 'kubectl -n $DB_Namespace apply -f k8s-deployment/mysql/mysql-deploy.yaml'
              //sh returnStdout: true, script: 'kubectl -n $DB_Namespace get pod -l app=mysql-wp|grep -v NAME | awk '{ print $1 }'| xargs -i kubectl -n $DB_Namespace delete pod {}'
-             sh returnStdout: true, script: 'SECRET_STATE=`kubectl -n $DB_Namespace get secret mysql-wp-pass -o jsonpath={.data.password} 2>/dev/null`'
-             sh returnStdout: false, script: 'echo $SECRET_STATE'
+             //sh returnStdout: true, script: 'SECRET_STATE=`kubectl -n $DB_Namespace get secret mysql-wp-pass -o jsonpath={.data.password} 2>/dev/null`'
+             //sh returnStdout: false, script: 'echo $SECRET_STATE'
 
              //someVar = "${SECRET_STATE}"
 
+              println(" Print Somethin inside MySQL Deployment")
              //if(someVar.isEmpty()){
              //     echo "mysql-wp-pass is EMPTRY"
              //  } else {
@@ -133,7 +134,11 @@ stage("Deploy MySQL DB"){
              sh script: 'sshpass -p ${Password} scp ${KubeConfigSafe}:~/.kube/config ~/.kube/'
              sh 'kubectl get nodes'
 
-
+             SECRET_STATE = """${sh(
+                                 returnStdout: true,
+                                 script: 'echo "clang"'
+             )}"""
+              
 
              deployMySQLDB()
 
