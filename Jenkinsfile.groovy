@@ -73,7 +73,7 @@ def deployMySQLDB(){
              sh returnStdout: true, script: 'SECRET_STATE=`kubectl -n $DB_Namespace get secret mysql-wp-pass -o jsonpath={.data.password} 2>/dev/null`'
              sh returnStdout: false, script: 'echo $SECRET_STATE'
 
-             if(SECRET_STATE.isEmpty()){
+             if($SECRET_STATE.isEmpty()){
                   echo "mysql-wp-pass is EMPTRY"
                } else {
                   echo "mysql-wp-pass NOT EMPTY"
