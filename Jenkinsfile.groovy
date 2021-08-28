@@ -117,11 +117,12 @@ stage("Kubectl config"){
 stage("Deploy MySQL DB"){
     node("${env.NodeName}"){
     wrap([$class: 'AnsiColorBuildWrapper']){
-       withEnv(['KubeConfigSafe=k8s-master-1.crdsmart.city', 'RepoImageName=' + LIMAGE, 'VERSION=' + VERSION]){
+       withEnv(['KubeConfigSafe=' + KubeConfigSafe, 'RepoImageName=' + LIMAGE, 'VERSION=' + VERSION]){
           withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'mysqldbconnect', usernameVariable: 'DBUserName', passwordVariable: 'DBPassword']]){
 
              echo '[Pipeline][INFO] Deploy MySQL(MariaDB) to the k8s Cluster...'
 
+             sh 'mkdir -p ~/.kube/'
              sh script: 'sshpass -p ${Password} scp ${KubeConfigSafe}:~/.kube/config ~/.kube/'
              sh 'kubectl get nodes'
 
