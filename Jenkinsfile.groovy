@@ -66,26 +66,18 @@ def deployMySQLDB(){
           ansiColor('vga') {
              echo '\033[42m\033[97mkubectl deployed and configured\033[0m'
              
-             //sh returnStdout: true, script: "kubectl -n $DB_Namespace create secret generic mysql-wp-pass --from-literal=username=$DBUserName --from-literal=password=$DBPassword"
+             echo "Secret value: $SECRET_STATE"
+             someVar = "${SECRET_STATE}"
              
-             //sh returnStdout: true, script: 'kubectl -n $DB_Namespace apply -f k8s-deployment/mysql/mysql-deploy.yaml'
-             //sh returnStdout: true, script: 'kubectl -n $DB_Namespace get pod -l app=mysql-wp|grep -v NAME | awk '{ print $1 }'| xargs -i kubectl -n $DB_Namespace delete pod {}'
-             //sh returnStdout: true, script: 'SECRET_STATE=`kubectl -n $DB_Namespace get secret mysql-wp-pass -o jsonpath={.data.password} 2>/dev/null`'
-             //sh returnStdout: false, script: 'echo $SECRET_STATE'
-
-             //someVar = "${SECRET_STATE}"
-
-              println(" Print Somethin inside MySQL Deployment")
-             //if(someVar.isEmpty()){
-             //     echo "mysql-wp-pass is EMPTRY"
-             //  } else {
-             //     echo "mysql-wp-pass NOT EMPTY"
-             //}
-
-             //sh returnStdout: true, script: 'if [ ! -z $SECRET_STATE ]; then echo "MySQL Secret mysql-wp-pass already exists"; else echo "Secret mysql-wp-pass is $SECRET_STATE and NOT  exists"; fi'
-
-             //kubectl -n $DBNAMESPACE create secret generic mysql-pass --from-literal=password=$dummy_pass
-             //kubectl -n $DB_Namespace create secret generic mysql-wp-pass --from-literal=username=$DBUserName --from-literal=password=$DBPassword"
+             if(someVar.isEmpty()){
+                  echo "mysql-wp-pass is EMPTRY"
+                  sh returnStdout: true, script: "kubectl -n $DB_Namespace create secret generic mysql-wp-pass --from-literal=username=$DBUserName --from-literal=password=$DBPassword"
+               } else {
+                  echo "mysql-wp-pass NOT EMPTY. No need to Deploy"
+             }
+             
+             sh returnStdout: true, script: 'kubectl -n $DB_Namespace apply -f k8s-deployment/mysql/mysql-deploy.yaml'
+             sh returnStdout: true, script: 'kubectl -n $DB_Namespace get pod -l app=mysql-wp|grep -v NAME | awk \'{ print $1 }\'| xargs -i kubectl -n $DB_Namespace delete pod {}'
              
           }
        }
@@ -136,16 +128,20 @@ stage("Deploy MySQL DB"){
 
              SECRET_STATE = """${sh(
                                  returnStdout: true,
-                                 script: 'echo "clang"'
+                                 script: 'kubectl -n $DB_Namespace get secret mysql-wp-pass -o jsonpath={.data.password} 2>/dev/null'
              )}"""
-              
-
+             
              deployMySQLDB()
-
+             
+             Pod_State = """${sh(
+                                 returnStdout: true,
+                                 script: 'kubectl -n $DB_Namespace get pod -l app=mysql-wp -o jsonpath={.items[*].status.phase}'
+             )}"""
+             
+             println("MySQL Pod Status: " + Pod_State)
 
           }
        }
    }
    }
 }
-
