@@ -72,17 +72,17 @@ def deployMySQLDB(){
 
 stage("Build MyQSL Image"){
     node("${env.NodeName}"){
-        wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'vga']){
+    wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']){
 
-              echo '[Pipeline][INFO] Checkout Code from GitHub...'
-              stCredentials()
-              validateInputs()
-              checkout scm
+       echo '[Pipeline][INFO] Checkout Code from GitHub...'
+       stCredentials()
+       validateInputs()
+       checkout scm
               
-              buildCustomMySQLImage()
+       buildCustomMySQLImage()
 
-              echo '\033[34mThis stage building MariaDB image and pushing it to the DockerHub\033[0m'
-        }
+       echo '\033[34mThis stage building MariaDB image and pushing it to the DockerHub\033[0m'
+       }
     }
 }
 
