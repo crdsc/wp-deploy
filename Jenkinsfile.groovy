@@ -67,9 +67,9 @@ def deployMySQLDB(){
              echo "\033[34m Blue \033[0m"
           
              sh '''
-             kubectl -n $DBNAMESPACE apply -f k8s-deployment/mysql/mysql-deploy.yaml
-             kubectl -n $DBNAMESPACE get pod |grep -v NAME | awk '{ print $1 }'| xargs -i kubectl -n $DBNAMESPACE delete pod {}
-             SECRET_STATE=`kubectl -n $DBNAMESPACE get secret mysql-pass -o jsonpath={.data.password} 2>/dev/null`
+             kubectl -n $DB_Namespace apply -f k8s-deployment/mysql/mysql-deploy.yaml
+             kubectl -n $DB_Namespace get pod |grep -v NAME | awk '{ print $1 }'| xargs -i kubectl -n $DB_Namespace delete pod {}
+             SECRET_STATE=`kubectl -n $DB_Namespace get secret mysql-pass -o jsonpath={.data.password} 2>/dev/null`
 
              echo $SECRET_STATE
 
