@@ -50,8 +50,8 @@ def buildCustomMySQLImage(){
        sh returnStdout: true, script: "sed -i 's/dummydb/wpdbtest/g; s/dummyuser/${DBUserName}/g; s/dummypass/${DBPassword}/g' sql-scripts/dbcreate.sql"
 
        sh 'docker pull $DBImageNAME'
-       sh returnStdout: true, script: "docker build --build-arg dummy_image='${DBImageNAME}' --build-arg dummy_pass=${DBPassword} -t $IMAGE ."
-       sh 'docker tag $IMAGE $LIMAGE:$VERSION'
+       sh returnStdout: true, script: "docker build --build-arg dummy_image='${DBImageNAME}' --build-arg dummy_pass=${DBPassword} -t $IMAGE:$VERSION ."
+       sh 'docker tag $IMAGE:$VERSION $LIMAGE:$VERSION'
        sh 'docker push $LIMAGE:$VERSION'
 
 
