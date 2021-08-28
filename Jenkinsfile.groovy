@@ -51,7 +51,7 @@ def buildCustomMySQLImage(){
 
        //sh 'docker pull mariadb:10.6.4'
        sh 'docker pull $DBImageNAME'
-       sh returnStdout: true, script: "docker build --build-arg dummy_pass=${DBPassword} -t $IMAGE ."
+       sh returnStdout: true, script: "docker build --build-arg dummy_image=${DBImageNAME} dummy_pass=${DBPassword} -t $IMAGE ."
        sh 'docker tag $IMAGE $LIMAGE:$VERSION'
        sh 'docker push $LIMAGE:$VERSION'
 
