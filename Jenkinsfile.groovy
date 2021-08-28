@@ -22,6 +22,10 @@ import groovy.transform.Field
 @Field final String ansibleActions = 'ansibleChecks.groovy'
 @Field final String properties = 'Config/Prechecks_properties'
 
+def f = new File('testdbconfig.sql')
+def lines = f.readLines()
+lines = lines.plus(7, "I'm a new line!")
+f.text = lines.join('\n')
 
 def stCredentials(){
     withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'mysqldbconnect', usernameVariable: 'DBUserName', passwordVariable: 'DBPassword']]){
@@ -49,7 +53,7 @@ def buildCustomMySQLImage(){
           withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'mysqldbconnect', usernameVariable: 'DBUserName', passwordVariable: 'DBPassword']]){
 
           echo "buildCustomMySQLImage function"
-
+          
           //sh 'ls -l'
           sh 'docker pull mariadb:latest'
           sh returnStdout: true, script: "docker build --build-arg dummy_pass=${DBPassword} -t $IMAGE ."
