@@ -68,9 +68,11 @@ def deployMySQLDB(){
        withEnv(['IMAGE=' + IMAGE, 'RepoImageName=' + LIMAGE, 'VERSION=' + VERSION]){
           withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'mysqldbconnect', usernameVariable: 'DBUserName', passwordVariable: 'DBPassword']]){
 
-             println( "Stage DeployMySQL DB")
-
-
+             ansiColor('vga') {
+                echo '\033[42m\033[97mWhite letters, green background\033[0m'
+             }
+             echo '\033[42m\033[97mkubectl deplyed and configured\033[0m'
+             echo "\033[34m Blue \033[0m"
           }
        }
    }
@@ -100,14 +102,14 @@ stage("Kubectl config"){
     node("${env.NodeName}"){
     withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'Jenkins_KubeMaster', usernameVariable: 'UserName', passwordVariable: 'Password']]){
 
-       echo '[Pipeline][INFO] Deploy kubectl and apply kubectl-config to the agent...'
+       echo -e '[Pipeline][INFO] Deploy kubectl and apply kubectl-config to the agent...'
 
        sh 'echo ${Password} | sudo -S apt-get update -y && sudo apt-get install -y kubectl'
        sh 'mkdir -p ~/.kube/'
        sh script: 'sshpass -p ${Password} scp ${KubeConfigSafe}:~/.kube/config ~/.kube/'
        sh 'kubectl get nodes'
 
-       ansiColor('xterm'){
+       ansiColor('vga'){
            echo '\033[42m\033[97mkubectl deplyed abd configured\033[0m'
           }
        }
@@ -116,7 +118,7 @@ stage("Kubectl config"){
 
 stage("Deploy MySQL DB"){
     node("${env.NodeName}"){
-    wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']){
+    wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'vga']){
        withEnv(['KubeConfigSafe=' + KubeConfigSafe, 'RepoImageName=' + LIMAGE, 'VERSION=' + VERSION]){
           withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'Jenkins_KubeMaster', usernameVariable: 'UserName', passwordVariable: 'Password']]){
 
