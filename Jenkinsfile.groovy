@@ -44,12 +44,13 @@ def validateInputs(){
 }
 
 def buildCustomMySQLImage(){
-    withEnv(['IMAGE=' + IMAGE, 'RepoImageName=' + LIMAGE, 'VERSION=' + VERSION]){
+    withEnv(['IMAGE=' + IMAGE, 'RepoImageName=' + LIMAGE, 'VERSION=' + VERSION, "DBImageNAME=" + DBImageNAME]){
        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'mysqldbconnect', usernameVariable: 'DBUserName', passwordVariable: 'DBPassword']]){
 
        sh returnStdout: true, script: "sed -i 's/dummydb/wpdbtest/g; s/dummyuser/${DBUserName}/g; s/dummypass/${DBPassword}/g' sql-scripts/dbcreate.sql"
 
-       sh 'docker pull mariadb:10.6.4'
+       //sh 'docker pull mariadb:10.6.4'
+       sh 'docker pull $DBImageNAME'
        sh returnStdout: true, script: "docker build --build-arg dummy_pass=${DBPassword} -t $IMAGE ."
        sh 'docker tag $IMAGE $LIMAGE:$VERSION'
        sh 'docker push $LIMAGE:$VERSION'
