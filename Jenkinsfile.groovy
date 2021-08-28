@@ -24,8 +24,10 @@ import groovy.transform.Field
 
 
 def stCredentials(){
-    mysqlCred = env.DBUserName
-    mysqldbPass = env.DBPassword
+    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'mysqldbconnect', usernameVariable: 'DBUserName', passwordVariable: 'DBPassword']]){
+       mysqlCred = "${DBUserName}"
+       mysqldbPass = "${DBPassword}"
+    }
 }
 
 def validateInputs(){
