@@ -130,7 +130,9 @@ stage("Deploy MySQL DB"){
                                  returnStdout: true,
                                  script: 'kubectl -n $DB_Namespace get secret mysql-wp-pass -o jsonpath={.data.password} 2>/dev/null'
              )}"""
-             
+
+             echo $SECRET_STATE
+
              deployMySQLDB()
              
              Pod_State = """${sh(
