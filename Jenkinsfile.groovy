@@ -49,7 +49,7 @@ def buildCustomMySQLImage(){
 
           echo "buildCustomMySQLImage function"
 
-          sh returnStdout: true, script: "sed -i '/PRIVILEGES/ s/dummydb/wpdbtest/g; s/dummydbuser/wpadmin/g; s/dummydbpass/password/g' sql-scripts/dbcreated.sql'
+          sh returnStdout: true, script: "sed -i '/PRIVILEGES/ s/dummydb/wpdbtest/g; s/dummydbuser/wpadmin/g; s/dummydbpass/password/g' sql-scripts/dbcreated.sql"
           sh returnStdout: true, script: "sed -i '/DATABASE/ s/dummydb/wpdbtest/' sql-scripts/dbcreated.sql"
   
           //sh 'ls -l'
