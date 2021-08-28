@@ -65,6 +65,15 @@ def deployMySQLDB(){
           ansiColor('vga') {
              echo '\033[42m\033[97mkubectl deplyed and configured\033[0m'
              echo "\033[34m Blue \033[0m"
+          
+             sh '''
+             kubectl -n $DBNAMESPACE apply -f k8s-deployment/mysql/mysql-deploy.yaml
+             kubectl -n $DBNAMESPACE get pod |grep -v NAME | awk '{ print $1 }'| xargs -i kubectl -n $DBNAMESPACE delete pod {}
+             SECRET_STATE=`kubectl -n $DBNAMESPACE get secret mysql-pass -o jsonpath={.data.password} 2>/dev/null`
+
+             echo $SECRET_STATE
+
+          '''
           }
        }
    }

@@ -8,18 +8,18 @@ metadata:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mysql
+  name: mysql-wp
   namespace: databases
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: mysql
+      app: mysql-wp
   template:
     metadata:
       creationTimestamp: null
       labels:
-        app: mysql
+        app: mysql-wp
     spec:
       containers:
       - env:
@@ -29,14 +29,14 @@ spec:
           valueFrom:
             secretKeyRef:
               key: password
-              name: mysql-pass
+              name: mysql-wp-pass
         - name: MYSQL_DATABASE
           value: pxdemo
         - name: MYSQL_ROOT_PASSWORD
           valueFrom:
             secretKeyRef:
               key: password
-              name: mysql-pass
+              name: mysql-wp-pass
         image: poyaskov/wp-mysql-db:0.1
         imagePullPolicy: IfNotPresent
         name: mysql
@@ -47,7 +47,6 @@ spec:
         volumeMounts:
         - mountPath: /var/lib/mysql
           name: mysql
-      dnsPolicy: ClusterFirst
       restartPolicy: Always
       securityContext: {}
       volumes:
@@ -62,7 +61,8 @@ metadata:
   labels:
     app: mysql
 spec:
-  storageClassName: gp2
+#  storageClassName: gp2
+  storageClassName: px-db
   accessModes:
     - ReadWriteOnce
   resources:
@@ -73,8 +73,8 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: mysql
-  name: mysql-svc
+    app: mysql-wp
+  name: mysql-wp-svc
   namespace: databases
 spec:
   ports:
@@ -82,5 +82,5 @@ spec:
     protocol: TCP
     targetPort: 3306
   selector:
-    app: mysql
+    app: mysql-wp
   type: ClusterIP
