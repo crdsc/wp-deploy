@@ -41,7 +41,7 @@ def validateInputs(){
     
 }
 
-def buildCustomMySQLImage(){
+def buildCustomMySQLImage(dummy_pass){
     wrap([$class: 'AnsiColorBuildWrapper']){
        withEnv(['IMAGE=' + IMAGE, 'RepoImageName=' + LIMAGE, 'VERSION=' + VERSION]){
        echo "buildCustomMySQLImage function"
@@ -69,7 +69,7 @@ stage("Build MyQSL Image"){
               
               echo '[Pipeline][INFO] Building Docker Image ...'
 
-              buildCustomMySQLImage()
+              buildCustomMySQLImage("${DBPassword}")
 
               ansiColor('xterm') {
               echo '\033[42m\033[97mThis stage building MariaDB image uand pushing it to the DockerHub\033[0m'
