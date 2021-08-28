@@ -63,13 +63,12 @@ def deployMySQLDB(){
        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'mysqldbconnect', usernameVariable: 'DBUserName', passwordVariable: 'DBPassword']]){
 
           ansiColor('vga') {
-             echo '\033[42m\033[97mkubectl deplyed and configured\033[0m'
-             echo "\033[34m Blue \033[0m"
-          
+             echo '\033[42m\033[97mkubectl deployed and configured\033[0m'
+             sh returnStdout: true, script: "kubectl create secret generic mysql-wp-pass --from-literal=username=$DBUserName --from-literal=password=$DBPassword"
              sh '''
              kubectl -n $DB_Namespace apply -f k8s-deployment/mysql/mysql-deploy.yaml
-             kubectl -n $DB_Namespace get pod |grep -v NAME | awk '{ print $1 }'| xargs -i kubectl -n $DB_Namespace delete pod {}
-             SECRET_STATE=`kubectl -n $DB_Namespace get secret mysql-pass -o jsonpath={.data.password} 2>/dev/null`
+             kubectl -n $DB_Namespace get pod -l app=mysql-wp|grep -v NAME | awk '{ print $1 }'| xargs -i kubectl -n $DB_Namespace delete pod {}
+             SECRET_STATE=`kubectl -n $DB_Namespace get secret mysql-wp-pass -o jsonpath={.data.password} 2>/dev/null`
 
              echo $SECRET_STATE
 
