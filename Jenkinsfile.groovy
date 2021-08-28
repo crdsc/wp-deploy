@@ -102,7 +102,7 @@ stage("Kubectl config"){
     node("${env.NodeName}"){
     withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'Jenkins_KubeMaster', usernameVariable: 'UserName', passwordVariable: 'Password']]){
 
-       echo -e '[Pipeline][INFO] Deploy kubectl and apply kubectl-config to the agent...'
+       echo '[Pipeline][INFO] Deploy kubectl and apply kubectl-config to the agent...'
 
        sh 'echo ${Password} | sudo -S apt-get update -y && sudo apt-get install -y kubectl'
        sh 'mkdir -p ~/.kube/'
