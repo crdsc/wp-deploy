@@ -64,14 +64,22 @@ def deployMySQLDB(){
 
           ansiColor('vga') {
              echo '\033[42m\033[97mkubectl deployed and configured\033[0m'
-             sh returnStdout: true, script: "kubectl create secret generic mysql-wp-pass --from-literal=username=$DBUserName --from-literal=password=$DBPassword"
+             //sh returnStdout: true, script: "kubectl -n $DB_Namespace create secret generic mysql-wp-pass --from-literal=username=$DBUserName --from-literal=password=$DBPassword"
              sh '''
              kubectl -n $DB_Namespace apply -f k8s-deployment/mysql/mysql-deploy.yaml
              kubectl -n $DB_Namespace get pod -l app=mysql-wp|grep -v NAME | awk '{ print $1 }'| xargs -i kubectl -n $DB_Namespace delete pod {}
              SECRET_STATE=`kubectl -n $DB_Namespace get secret mysql-wp-pass -o jsonpath={.data.password} 2>/dev/null`
 
              echo $SECRET_STATE
-
+             echo $SECRET_STATE 
+             if [ ! -z $SECRET_STATE ]
+                then
+                  echo "MySQL Secrey Already exists."
+                else
+                  echo "Create k8s secret from literal"
+                  //kubectl -n $DBNAMESPACE create secret generic mysql-pass --from-literal=password=$dummy_pass
+                  kubectl -n $DB_Namespace create secret generic mysql-wp-pass --from-literal=username=$DBUserName --from-literal=password=$DBPassword"
+             fi
           '''
           }
        }
