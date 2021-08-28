@@ -85,15 +85,18 @@ stage("Build MyQSL Image"){
 
 stage("Kubectl config"){
     node("${env.NodeName}"){
-    echo '[Pipeline][INFO] Deploy kubectl and apply kubectl-config to the agent...'
+    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'Jenkins_KubeMaster', usernameVariable: 'UserName', passwordVariable: 'Password']]){
 
-    sh 'sudo apt-get update -y && sudo apt-get install -y kubectl'
-    sh 'mkdir -p ~/.kube/'
-    sh script: "scp "${KubeConfigSafe}":~/.kube/config ~/.kube/"
-    sh 'kubectl get nodes'
+       echo '[Pipeline][INFO] Deploy kubectl and apply kubectl-config to the agent...'
 
-    ansiColor('xterm'){
-        echo '\033[42m\033[97mkubectl deplyed abd configured\033[0m'
+       sh 'echo ${Password} | sudo -S apt-get update -y && sudo apt-get install -y kubectl'
+       sh 'mkdir -p ~/.kube/'
+       sh script: "scp "${KubeConfigSafe}":~/.kube/config ~/.kube/"
+       sh 'kubectl get nodes'
+
+       ansiColor('xterm'){
+           echo '\033[42m\033[97mkubectl deplyed abd configured\033[0m'
+          }
        }
     }
 }
