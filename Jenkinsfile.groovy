@@ -102,7 +102,7 @@ stage("Kubectl config"){
 
        echo '[Pipeline][INFO] Deploy kubectl and apply kubectl-config to the agent...'
 
-       sh 'echo ${Password} | sudo -S apt-get update -y && sudo apt-get install -y kubectl'
+       sh 'echo "${Password}" | sudo -S apt-get update -y && sudo apt-get install -y kubectl'
        sh 'mkdir -p ~/.kube/'
        sh script: "scp ${KubeConfigSafe}:~/.kube/config ~/.kube/"
        //sh 'kubectl get nodes'
