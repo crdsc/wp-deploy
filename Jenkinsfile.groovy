@@ -83,13 +83,17 @@ stage("Build MyQSL Image"){
     }
 }
 
-stage("Stage 3"){
+stage("Kubectl config"){
     node("${env.NodeName}"){
+    echo '[Pipeline][INFO] Deploy kubectl and apply kubectl-config to the agent...'
+
+    sh 'sudo apt-get update -y && sudo apt-get install -y kubectl'
+    sh 'mkdir -p ~/.kube/'
+    sh script: "scp "${KubeConfigSafe}":~/.kube/config ~/.kube/"
+    sh 'kubectl get nodes'
+
     ansiColor('xterm'){
-        echo '[Pipeline][INFO] Stage Three ...'
-        echo '\033[34mHello\033[0m \033[33mcolorful\033[0m \033[35mworld!\033[0m'
-        echo '\033[42m\033[97mWhite letters, green background\033[0m'
-        echo "\u001b[31m Please enter DB user name\u001b[0m"
+        echo '\033[42m\033[97mkubectl deplyed abd configured\033[0m'
        }
     }
 }
