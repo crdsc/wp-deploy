@@ -80,20 +80,16 @@ def deployMySQLDB(){
 
 stage("Build MyQSL Image"){
     node("${env.NodeName}"){
-        wrap([$class: 'AnsiColorBuildWrapper']){
+        wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'vga']){
 
               echo '[Pipeline][INFO] Checkout Code from GitHub...'
               stCredentials()
               validateInputs()
               checkout scm
               
-              echo '[Pipeline][INFO] Building Docker Image ...'
-
               buildCustomMySQLImage()
 
-              ansiColor('vga') {
               echo '\033[34mThis stage building MariaDB image uand pushing it to the DockerHub\033[0m'
-             }
         }
     }
 }
@@ -103,15 +99,11 @@ stage("Kubectl config"){
     withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'Jenkins_KubeMaster', usernameVariable: 'UserName', passwordVariable: 'Password']]){
 
        echo '[Pipeline][INFO] Deploy kubectl and apply kubectl-config to the agent...'
-
        sh 'echo ${Password} | sudo -S apt-get update -y && sudo apt-get install -y kubectl'
        sh 'mkdir -p ~/.kube/'
        sh script: 'sshpass -p ${Password} scp ${KubeConfigSafe}:~/.kube/config ~/.kube/'
        sh 'kubectl get nodes'
 
-       ansiColor('vga'){
-           echo '\033[42m\033[97mkubectl deplyed abd configured\033[0m'
-          }
        }
     }
 }
@@ -130,7 +122,7 @@ stage("Deploy MySQL DB"){
 
 
 
-             deployMySQLDB()
+       //      deployMySQLDB()
 
 
           }
