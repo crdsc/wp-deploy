@@ -70,11 +70,12 @@ def deployMySQLDB(){
              sh returnStdout: true, script: 'kubectl -n $DB_Namespace apply -f k8s-deployment/mysql/mysql-deploy.yaml'
              //sh returnStdout: true, script: 'kubectl -n $DB_Namespace get pod -l app=mysql-wp|grep -v NAME | awk '{ print $1 }'| xargs -i kubectl -n $DB_Namespace delete pod {}'
              sh returnStdout: true, script: 'SECRET_STATE=`kubectl -n $DB_Namespace get secret mysql-wp-pass -o jsonpath={.data.password} 2>/dev/null`'
-             sh returnStdout: true, script: 'echo $SECRET_STATE'
+             sh returnStdout: false, script: 'echo $SECRET_STATE'
 
-             if(SECRET_STATE.isEmpty){
+             if($SECRET_STATE.isEmpty){
                 echo "mysql-wp-pass is EMPTRY"
-             }else{
+             } 
+             else{
                 echo "mysql-wp-pass NOT EMPTY"
              }
 
