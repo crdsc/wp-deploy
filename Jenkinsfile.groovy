@@ -104,8 +104,8 @@ stage("Kubectl config"){
 
        sh 'echo "${Password}" | sudo -S apt-get update -y && sudo apt-get install -y kubectl'
        sh 'mkdir -p ~/.kube/'
-       sh script: "scp ${KubeConfigSafe}:~/.kube/config ~/.kube/"
-       //sh 'kubectl get nodes'
+       sh script: "sshpass -p "${Password}" scp ${KubeConfigSafe}:~/.kube/config ~/.kube/"
+       sh 'kubectl get nodes'
 
        ansiColor('xterm'){
            echo '\033[42m\033[97mkubectl deplyed abd configured\033[0m'
@@ -122,7 +122,7 @@ stage("Deploy MySQL DB"){
 
              echo '[Pipeline][INFO] Deploy MySQL(MariaDB) to the k8s Cluster...'
 
-             sh script: "scp ${KubeConfigSafe}:~/.kube/config ~/.kube/"
+             sh script: "sshpass -p "${Password}" scp ${KubeConfigSafe}:~/.kube/config ~/.kube/"
              sh 'kubectl get nodes'
 
 
