@@ -30,6 +30,7 @@ def stCredentials(){
 }
 
 def validateInputs(){
+   ansiColor('xterm') {
     print("Pipeline Inputs validation...")
     if(mysqlCred.isEmpty()){
         error "\u001b[1;31m Please enter DB user name\u001b[0m"
@@ -39,7 +40,7 @@ def validateInputs(){
         error "\u001b[1;31m DB user password cannot be empty!\u001b[0m"
         currentBuild.result = 'FAILURE'
     }
-    
+  }
 }
 
 def buildCustomMySQLImage(){
