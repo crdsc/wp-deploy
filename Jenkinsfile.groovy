@@ -41,7 +41,7 @@ def validateInputs(){
     
 }
 
-def buildCustomMySQLImage(dummy_pass){
+def buildCustomMySQLImage(){
     wrap([$class: 'AnsiColorBuildWrapper']){
        withEnv(['IMAGE=' + IMAGE, 'RepoImageName=' + LIMAGE, 'VERSION=' + VERSION]){
           withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'mysqldbconnect', usernameVariable: 'DBUserName', passwordVariable: 'DBPassword']]){
