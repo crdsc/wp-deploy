@@ -1,5 +1,3 @@
 CREATE DATABASE dummydb;
-
-GRANT ALL PRIVILEGES ON dummydb.* TO "dummydbuser"@"%" IDENTIFIED BY "dummydbpass";
-
+GRANT ALL PRIVILEGES ON dummydb.* TO "dummyuser"@"%" IDENTIFIED BY "dummypass";
 FLUSH PRIVILEGES;
