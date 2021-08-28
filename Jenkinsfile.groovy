@@ -91,8 +91,8 @@ stage("Build MyQSL Image"){
 
               buildCustomMySQLImage()
 
-              ansiColor('xterm') {
-              echo '\033[42m\033[97mThis stage building MariaDB image uand pushing it to the DockerHub\033[0m'
+              ansiColor('vga') {
+              echo '\033[34mThis stage building MariaDB image uand pushing it to the DockerHub\033[0m'
              }
         }
     }
