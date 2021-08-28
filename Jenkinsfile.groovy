@@ -91,7 +91,7 @@ stage("Kubectl config"){
 
        sh 'echo ${Password} | sudo -S apt-get update -y && sudo apt-get install -y kubectl'
        sh 'mkdir -p ~/.kube/'
-       sh script: "scp "${KubeConfigSafe}":~/.kube/config ~/.kube/"
+       sh script: "scp ${KubeConfigSafe}:~/.kube/config ~/.kube/"
        sh 'kubectl get nodes'
 
        ansiColor('xterm'){
