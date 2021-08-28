@@ -102,9 +102,9 @@ stage("Kubectl config"){
 
        echo '[Pipeline][INFO] Deploy kubectl and apply kubectl-config to the agent...'
 
-       sh 'echo "${Password}" | sudo -S apt-get update -y && sudo apt-get install -y kubectl'
+       sh 'echo ${Password} | sudo -S apt-get update -y && sudo apt-get install -y kubectl'
        sh 'mkdir -p ~/.kube/'
-       sh script: "sshpass -p "${Password}" scp ${KubeConfigSafe}:~/.kube/config ~/.kube/"
+       sh script: 'sshpass -p ${Password} scp ${KubeConfigSafe}:~/.kube/config ~/.kube/'
        sh 'kubectl get nodes'
 
        ansiColor('xterm'){
@@ -122,7 +122,7 @@ stage("Deploy MySQL DB"){
 
              echo '[Pipeline][INFO] Deploy MySQL(MariaDB) to the k8s Cluster...'
 
-             sh script: "sshpass -p "${Password}" scp ${KubeConfigSafe}:~/.kube/config ~/.kube/"
+             sh script: 'sshpass -p ${Password} scp ${KubeConfigSafe}:~/.kube/config ~/.kube/'
              sh 'kubectl get nodes'
 
 
