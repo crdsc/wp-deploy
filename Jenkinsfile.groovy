@@ -81,7 +81,7 @@ stage("Build MyQSL Image"){
               
        buildCustomMySQLImage()
 
-       echo '\033[34mThis stage building MariaDB image and pushing it to the DockerHub\033[0m'
+       echo '\033[34mThis stage has built MariaDB image and pushed it to the DockerHub\033[0m'
        }
     }
 }
@@ -102,7 +102,7 @@ stage("Kubectl config"){
 
 stage("Deploy MySQL DB"){
     node("${env.NodeName}"){
-    wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'vga']){
+    wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']){
        withEnv(['KubeConfigSafe=' + KubeConfigSafe, 'RepoImageName=' + LIMAGE, 'VERSION=' + VERSION]){
           withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'Jenkins_KubeMaster', usernameVariable: 'UserName', passwordVariable: 'Password']]){
 
