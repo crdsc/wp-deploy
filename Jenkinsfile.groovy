@@ -53,6 +53,7 @@ def buildCustomMySQLImage(){
           sh returnStdout: true, script: "sed -i '/DATABASE/ s/dummydb/wpdbtest/' sql-scripts/dbcreated.sql"
   
           //sh 'ls -l'
+          sh 'cat sql-scripts/dbcreated.sql'
           sh 'docker pull mariadb:latest'
           sh returnStdout: true, script: "docker build --build-arg dummy_pass=${DBPassword} -t $IMAGE ."
           sh 'docker tag $IMAGE $LIMAGE:$VERSION'
