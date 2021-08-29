@@ -58,7 +58,7 @@ def buildCustomMySQLImage(){
        }
    }
 }
-
+// Deploy MySQL DB
 def deployMySQLDB(){
     withEnv(['IMAGE=' + IMAGE, 'RepoImageName=' + LIMAGE, 'VERSION=' + VERSION]){
        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'mysqldbconnect', usernameVariable: 'DBUserName', passwordVariable: 'DBPassword']]){
@@ -87,6 +87,16 @@ def deployMySQLDB(){
              sh returnStdout: true, script: 'kubectl -n $DB_Namespace get pod -l app=mysql-wp|grep -v NAME | awk \'{ print $1 }\'| xargs -i kubectl -n $DB_Namespace delete pod {}'
              
           }
+       }
+   }
+}
+// DEPLOY WPRESS 
+def deployWPressApp(){
+    withEnv(['IMAGE=' + IMAGE, 'RepoImageName=' + LIMAGE, 'VERSION=' + VERSION]){
+       withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'mysqldbconnect', usernameVariable: 'DBUserName', passwordVariable: 'DBPassword']]){
+
+       println("DEploying WordPress")
+
        }
    }
 }
@@ -153,6 +163,36 @@ stage("Deploy MySQL DB"){
              )}"""
              
              println("MySQL Pod Status: " + Pod_State)
+
+          }
+       }
+   }
+   }
+}
+
+stage("Deploy WPress App"){
+    node("${env.NodeName}"){
+    wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']){
+       withEnv(['KubeConfigSafe=' + KubeConfigSafe, 'RepoImageName=' + LIMAGE, 'VERSION=' + VERSION]){
+          withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'Jenkins_KubeMaster', usernameVariable: 'UserName', passwordVariable: 'Password']]){
+
+             echo '[Pipeline][INFO] Deploy WordPress App to the k8s Cluster...'
+
+             NS_State = """${sh(
+                                 returnStdout: true,
+                                 script: 'kubectl get ns $App_Namespace 2>/dev/null || true'
+             )}"""
+
+             println("NameSpace status:" + NS_State )
+
+             deployWPressApp()
+
+             Pod_State = """${sh(
+                                 returnStdout: true,
+                                 script: 'kubectl -n $App_Namespace get pod -l app=wordpress -o jsonpath={.items[*].status.phase}'
+             )}"""
+
+             println("WordPrtess Pod Status: " + Pod_State)
 
           }
        }
