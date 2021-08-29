@@ -95,7 +95,16 @@ def deployWPressApp(){
     withEnv(['IMAGE=' + IMAGE, 'RepoImageName=' + LIMAGE, 'VERSION=' + VERSION]){
        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'mysqldbconnect', usernameVariable: 'DBUserName', passwordVariable: 'DBPassword']]){
 
-       println("DEploying WordPress")
+          println("Deploying WordPress")
+          if(NS_State.isEmpty()){
+               echo "Namespace  ${App_Namespace} does not exist"
+               sh returnStdout: true, script: "kubectl create ns $App_Namespace"
+            } else {
+                  echo "Namespace  ${DB_Namespace} Already EXISTs"
+          }
+          sh returnStdout: true, script: "sed -i 's/dummydbnamespace/${App_Namespace}/g' k8s-deployment/wp-app/wordpress-deployment.yaml"
+          sh returnStdout: true, script: 'kubectl -n $App_Namespace apply -f k8s-deployment/wp-app/wordpress-deployment.yaml'
+          sh returnStdout: true, script: 'kubectl -n $App_Namespace get pod -l app=wordpress|grep -v NAME | awk \'{ print $1 }\'| xargs -i kubectl -n $App_Namespace delete pod {}'
 
        }
    }
@@ -183,7 +192,7 @@ stage("Deploy WPress App"){
                                  script: 'kubectl get ns $App_Namespace 2>/dev/null || true'
              )}"""
 
-             println("NameSpace status:" + NS_State )
+             println("EWP App NameSpace status:" + NS_State )
 
              deployWPressApp()
 
