@@ -3,13 +3,13 @@ apiVersion: v1
 kind: Namespace
 metadata:
   labels:
-  name: databases
+  name: dummydbnamespace
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: mysql-wp
-  namespace: databases
+  namespace: dummydbnamespace
 spec:
   replicas: 1
   selector:
@@ -58,6 +58,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: gp2-mysql-pvc
+  namespace: dummydbnamespace
   labels:
     app: mysql
 spec:
@@ -75,7 +76,7 @@ metadata:
   labels:
     app: mysql-wp
   name: mysql-wp-svc
-  namespace: databases
+  namespace: dummydbnamespace
 spec:
   ports:
   - port: 3306
