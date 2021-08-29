@@ -100,8 +100,16 @@ def deployWPressApp(){
                echo "Namespace  ${App_Namespace} does not exist"
                sh returnStdout: true, script: "kubectl create ns $App_Namespace"
             } else {
-                  echo "Namespace  ${DB_Namespace} Already EXISTs"
+                  echo "Namespace  ${App_Namespace} Already EXISTs"
           }
+
+          if(SECRET_STATE.isEmpty()){
+               echo "mysql-wp-pass is EMPTRY"
+               sh returnStdout: true, script: "kubectl -n $App_Namespace create secret generic mysql-wp-pass --from-literal=username=$DBUserName --from-literal=password=$DBPassword"
+            } else {
+               echo "mysql-wp-pass NOT EMPTY. No need to Deploy"
+          }
+
           sh returnStdout: true, script: "sed -i 's/dummyappnamespace/${App_Namespace}/g' k8s-deployment/wp-app/wordpress-deployment.yaml"
           sh returnStdout: true, script: 'kubectl -n $App_Namespace apply -f k8s-deployment/wp-app/wordpress-deployment.yaml'
           sh returnStdout: true, script: 'kubectl -n $App_Namespace get pod -l app=wordpress|grep -v NAME | awk \'{ print $1 }\'| xargs -i kubectl -n $App_Namespace delete pod {}'
@@ -193,6 +201,11 @@ stage("Deploy WPress App"){
              )}"""
 
              println("EWP App NameSpace status:" + NS_State )
+
+             SECRET_STATE = """${sh(
+                                 returnStdout: true,
+                                 script: 'kubectl -n $App_Namespace get secret mysql-wp-pass -o jsonpath={.data.password} 2>/dev/null || true'
+             )}"""
 
              deployWPressApp()
 
