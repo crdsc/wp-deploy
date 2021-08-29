@@ -138,6 +138,8 @@ stage("Deploy MySQL DB"){
                                  script: 'kubectl get $DB_Namespace 2>/dev/null || true'  
              )}"""
 
+             println("NameSpace status:" + NS_State )
+
              SECRET_STATE = """${sh(
                                  returnStdout: true,
                                  script: 'kubectl -n $DB_Namespace get secret mysql-wp-pass -o jsonpath={.data.password} 2>/dev/null || true'
