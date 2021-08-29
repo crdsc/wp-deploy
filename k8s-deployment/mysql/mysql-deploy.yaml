@@ -44,6 +44,13 @@ spec:
         - containerPort: 3306
           protocol: TCP
         resources: {}
+        resources:
+          limits:
+            cpu: 250m
+            memory: 256Mi
+          requests:
+            cpu: 250m
+            memory: 256Mi
         volumeMounts:
         - mountPath: /var/lib/mysql
           name: mysql
