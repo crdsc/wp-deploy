@@ -135,7 +135,7 @@ stage("Deploy MySQL DB"){
 
              NS_State = """${sh(
                                  returnStdout: true,
-                                 script: 'kubectl get $DB_Namespace 2>/dev/null || true'  
+                                 script: 'kubectl get ns $DB_Namespace 2>/dev/null || true'  
              )}"""
 
              println("NameSpace status:" + NS_State )
