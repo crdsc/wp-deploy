@@ -76,7 +76,7 @@ def deployMySQLDB(){
                   echo "mysql-wp-pass NOT EMPTY. No need to Deploy"
              }
 
-             sh returnStdout: true, script: 'sed \'s/dummydbnamespace/$DB_Namespac/g\' k8s-deployment/mysql/mysql-deploy.yaml'
+             sh returnStdout: true, script: "sed -i 's/dummydbnamespace/${DB_Namespace}/g' k8s-deployment/mysql/mysql-deploy.yaml"
              sh returnStdout: true, script: 'kubectl -n $DB_Namespace apply -f k8s-deployment/mysql/mysql-deploy.yaml'
              sh returnStdout: true, script: 'kubectl -n $DB_Namespace get pod -l app=mysql-wp|grep -v NAME | awk \'{ print $1 }\'| xargs -i kubectl -n $DB_Namespace delete pod {}'
              
