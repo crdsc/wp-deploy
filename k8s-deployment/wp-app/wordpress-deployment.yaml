@@ -9,7 +9,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: wordpress
-  namespace: wp-test
+  namespace: dummyappnamespace
   labels:
     app: wordpress
 spec:
@@ -24,7 +24,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: gp2-wp-pvc
-  namespace: wp-test
+  namespace: dummyappnamespace
   labels:
     app: wordpress
 spec:
@@ -39,7 +39,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: wordpress
-  namespace: wp-test
+  namespace: dummyappnamespace
   labels:
     app: wordpress
 spec:

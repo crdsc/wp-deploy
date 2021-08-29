@@ -102,7 +102,7 @@ def deployWPressApp(){
             } else {
                   echo "Namespace  ${DB_Namespace} Already EXISTs"
           }
-          sh returnStdout: true, script: "sed -i 's/dummydbnamespace/${App_Namespace}/g' k8s-deployment/wp-app/wordpress-deployment.yaml"
+          sh returnStdout: true, script: "sed -i 's/dummyappnamespace/${App_Namespace}/g' k8s-deployment/wp-app/wordpress-deployment.yaml"
           sh returnStdout: true, script: 'kubectl -n $App_Namespace apply -f k8s-deployment/wp-app/wordpress-deployment.yaml'
           sh returnStdout: true, script: 'kubectl -n $App_Namespace get pod -l app=wordpress|grep -v NAME | awk \'{ print $1 }\'| xargs -i kubectl -n $App_Namespace delete pod {}'
 
