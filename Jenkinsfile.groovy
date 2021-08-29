@@ -66,6 +66,12 @@ def deployMySQLDB(){
           ansiColor('vga') {
              echo '\033[42m\033[97mkubectl deployed and configured\033[0m'
              
+             if(NS_State.isEmpty()){
+                  echo "Namespace  ${DB_Namespace} does not exist"
+                  sh returnStdout: true, script: "kubectl create ns $DB_Namespace"
+               } else {
+                  echo "Namespace  ${DB_Namespace} Already EXISTs"
+             }
              echo "Secret value: $SECRET_STATE"
              someVar = "${SECRET_STATE}"
              
@@ -126,6 +132,11 @@ stage("Deploy MySQL DB"){
              sh 'mkdir -p ~/.kube/'
              sh script: 'sshpass -p ${Password} scp ${KubeConfigSafe}:~/.kube/config ~/.kube/'
              sh 'kubectl get nodes'
+
+             NS_State = """${sh(
+                                 returnStdout: true,
+                                 script: 'kubectl get $DB_Namespace 2>/dev/null || true'  
+             )}"""
 
              SECRET_STATE = """${sh(
                                  returnStdout: true,
