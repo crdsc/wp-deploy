@@ -64,7 +64,7 @@ def buildCustomMySQLImage(){
 
           if(env.ClusterActivity.equals("Deploy")){
 
-             sh returnStdout: true, script: "sed -i 's/dummydb/wpdbtest/g; s/dummyuser/${DBUserName}/g; s/dummypass/${DBPassword}/g' sql-scripts/dbcreate.sql"
+             sh returnStdout: true, script: "sed -i 's/dummydb/wordpress/g; s/dummyuser/${DBUserName}/g; s/dummypass/${DBPassword}/g' sql-scripts/dbcreate.sql"
 
              sh 'docker pull $DBImageNAME'
              sh returnStdout: true, script: "docker build --build-arg dummy_image='${DBImageNAME}' --build-arg dummy_pass=${DBPassword} -t $IMAGE:$VERSION ."
