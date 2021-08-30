@@ -192,9 +192,6 @@ stage("Deploy MySQL DB"){
 }
 
 stage("Deploy WPress App"){
-    when {
-        App_DEPLOY true
-    }
     node("${env.NodeName}"){
     wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']){
        withEnv(['KubeConfigSafe=' + KubeConfigSafe, 'RepoImageName=' + LIMAGE, 'VERSION=' + VERSION]){
@@ -227,4 +224,12 @@ stage("Deploy WPress App"){
        }
    }
    }
+}
+
+stage("Check Deployment Condition"){
+    when {
+        App_DEPLOY true
+
+        println("Print App_DEPLOY condition. Is:" + App_DEPLOY)
+    }
 }
