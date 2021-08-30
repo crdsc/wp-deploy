@@ -51,13 +51,18 @@ def buildCustomMySQLImage(){
     withEnv(['IMAGE=' + IMAGE, 'RepoImageName=' + LIMAGE, 'VERSION=' + VERSION, "DBImageNAME=" + DBImageNAME]){
        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'mysqldbconnect', usernameVariable: 'DBUserName', passwordVariable: 'DBPassword']]){
 
-       sh returnStdout: true, script: "sed -i 's/dummydb/wpdbtest/g; s/dummyuser/${DBUserName}/g; s/dummypass/${DBPassword}/g' sql-scripts/dbcreate.sql"
+          if(env.ClusterActivity.equals("Deploy")){
 
-       sh 'docker pull $DBImageNAME'
-       sh returnStdout: true, script: "docker build --build-arg dummy_image='${DBImageNAME}' --build-arg dummy_pass=${DBPassword} -t $IMAGE:$VERSION ."
-       sh 'docker tag $IMAGE:$VERSION $LIMAGE:$VERSION'
-       sh 'docker push $LIMAGE:$VERSION'
+             sh returnStdout: true, script: "sed -i 's/dummydb/wpdbtest/g; s/dummyuser/${DBUserName}/g; s/dummypass/${DBPassword}/g' sql-scripts/dbcreate.sql"
 
+             sh 'docker pull $DBImageNAME'
+             sh returnStdout: true, script: "docker build --build-arg dummy_image='${DBImageNAME}' --build-arg dummy_pass=${DBPassword} -t $IMAGE:$VERSION ."
+             sh 'docker tag $IMAGE:$VERSION $LIMAGE:$VERSION'
+             sh 'docker push $LIMAGE:$VERSION'
+         
+          } else {
+            println("In DESTROY Stage you don't need to build a new Docker Image")
+          }
 
        }
    }
@@ -249,9 +254,8 @@ stage("WPress App Activity"){
 
              if(env.ClusterActivity.equals("Deploy")){
                 deployWPressApp()
-                }
+                } else {
 
-             if(env.ClusterActivity.equals("Destroy")){
                 destroyWPressApp()
                 }
 
