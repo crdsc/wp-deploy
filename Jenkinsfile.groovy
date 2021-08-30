@@ -263,14 +263,24 @@ stage("WPress App Activity"){
 
              sh script: 'sshpass -p ${Password} scp ${KubeConfigSafe}:~/wp-test-site.tar.gz .'
              sh returnStdout: true,script: '''
-
                  tar -xvf wp-test-site.tar.gz
-                 ls -l
              '''              
 
              if( "${Pod_State}".trim().equals("Running") ){
               
                  println("\033[32;1mPod_State is \033[0m " + Pod_State + " \033[32;1m and working\033[0m ")
+                 DB_POD_NAME = """${sh(
+                    returnStdout: true,
+                    kubectl -n $DB_Namespace get pod -l app=mysql-wp -o=jsonpath={.items..metadata.name} || true
+                 )}"""
+
+                 APP_POD_NAME = """${sh(
+                    returnStdout: true,
+                    kubectl -n $App_Namespace get pod -l app=wordpress -o=jsonpath={.items..metadata.name} || true
+                 )}"""
+
+                 println("\033[32;1mApp Pod Name is \033[0m " + APP_POD_NAME)
+                 println("\033[32;1mDB Pod Name is \033[0m " + DB_POD_NAME)
 
              } else {
                  println("\033[31;1mPod_State is \033[0m " + Pod_State + " \033[31;1m and NOT working\033[0m ")
