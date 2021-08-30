@@ -187,7 +187,7 @@ stage("Kubectl config"){
     }
 }
 
-stage("Deploy MySQL DB"){
+stage("MySQL DB Activity"){
     node("${env.NodeName}"){
     wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']){
        withEnv(['KubeConfigSafe=' + KubeConfigSafe, 'RepoImageName=' + LIMAGE, 'VERSION=' + VERSION]){
