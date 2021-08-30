@@ -28,9 +28,9 @@ def setCredentials(){
        mysqldbPass = "${DBPassword}"
 
        if(k8sLocation.equals("AWS")){
-         def storageClassName = "gp2"
+         storageClassName = "gp2"
        } else {
-         def storageClassName = "px-repl1-sc"
+         storageClassName = "px-repl1-sc"
        }
     }
 }
@@ -138,7 +138,7 @@ def destroyMySQLDB(){
     withEnv(['IMAGE=' + IMAGE, 'RepoImageName=' + LIMAGE, 'VERSION=' + VERSION]){
        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'mysqldbconnect', usernameVariable: 'DBUserName', passwordVariable: 'DBPassword']]){
 
-          echo '\033[42m\033[97mDESTROYING MySQL DB Instance\033[0m'
+          echo '\033[42mDESTROYING MySQL DB Instance\033[0m'
 
           sh returnStdout: true, script: "sed -i 's/dummydbnamespace/${DB_Namespace}/g' k8s-deployment/mysql/mysql-deploy.yaml"
           sh returnStdout: true, script: 'kubectl -n $DB_Namespace delete -f k8s-deployment/mysql/mysql-deploy.yaml'
@@ -152,7 +152,7 @@ def deployWPressApp(){
     withEnv(['IMAGE=' + IMAGE, 'RepoImageName=' + LIMAGE, 'VERSION=' + VERSION, 'storageClassName=' + storageClassName]){
        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'mysqldbconnect', usernameVariable: 'DBUserName', passwordVariable: 'DBPassword']]){
 
-          println("Deploying WordPress")
+          println("Deploying WordPress with storageClassName: " + storageClassName )
           if(NS_State.isEmpty()){
                echo "Namespace  ${App_Namespace} does not exist"
                sh returnStdout: true, script: "kubectl create ns $App_Namespace"
