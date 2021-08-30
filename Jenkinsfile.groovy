@@ -112,7 +112,7 @@ def deployMySQLDB(){
                 sh returnStdout: true, script: '''
                    DB_POD_NAME=`kubectl -n $DB_Namespace get pod -l app=mysql-wp -o=jsonpath={.items..metadata.name}`
                    kubectl -n $DB_Namespace get pod $DB_POD_NAME
-                   kubectl -n $DB_Namespace exec -ti $DB_POD_NAME -- mysql -h localhost -u$DBUserName -p$DBPassword wordpress < wpdatabase.sql
+                   kubectl -n $DB_Namespace exec -ti $DB_POD_NAME -- mysql -h localhost -u$DBUserName -p$DBPassword < wpdatabase.sql
                 '''
 
              } else {
@@ -180,7 +180,7 @@ def deployWPressApp(){
                 tar -xvf wp-test-site.tar.gz
                 App_POD_NAME=`kubectl -n $App_Namespace get pod -l app=wordpress -o=jsonpath={.items..metadata.name}`
                 kubectl -n $App_Namespace get pod $App_POD_NAME
-                kubectl cp var/www/html $App_Namespace/$APP_POD_NAME:/var/www/html
+                kubectl cp var/www/html $App_Namespace/$App_POD_NAME:/var/www/html
              '''
 
           } else {
