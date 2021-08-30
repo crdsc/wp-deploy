@@ -40,6 +40,10 @@ def validateInputs(){
         error "\u001b[1;31m DB user password cannot be empty!\u001b[0m"
         currentBuild.result = 'FAILURE'
     }
+    if(App_DEPLOY.isEmpty() && App_DESTROY.isEmpty()){
+        error "\u001b[1;31m Both, Deploy or Destyroy did not checked out. Please make your choice\u001b[0m"
+        currentBuild.result = 'FAILURE'
+    }
   }
 }
 
