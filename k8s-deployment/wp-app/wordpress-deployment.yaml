@@ -8,7 +8,10 @@ metadata:
     app: wordpress
 spec:
   ports:
-    - port: 80
+  - nodePort: 32669
+    port: 80
+    protocol: TCP
+    targetPort: 80
   selector:
     app: wordpress
     tier: frontend
@@ -50,7 +53,7 @@ spec:
         tier: frontend
     spec:
       containers:
-      - image: wordpress:4.8-apache
+      - image: wordpress:5.8-apache
         name: wordpress
         env:
         - name: WORDPRESS_DB_HOST
