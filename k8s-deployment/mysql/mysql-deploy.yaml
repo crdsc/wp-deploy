@@ -1,0 +1,88 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-wp
+  namespace: dummydbnamespace
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql-wp
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: mysql-wp
+    spec:
+      containers:
+      - env:
+        - name: MYSQL_USER
+          value: mysql
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: mysql-wp-pass
+        - name: MYSQL_DATABASE
+          value: pxdemo
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: mysql-wp-pass
+        image: mysql:5.7.31
+        imagePullPolicy: IfNotPresent
+        name: mysql
+        ports:
+        - containerPort: 3306
+          protocol: TCP
+        resources: {}
+        resources:
+          limits:
+            cpu: 250m
+            memory: 256Mi
+          requests:
+            cpu: 250m
+            memory: 256Mi
+        volumeMounts:
+        - mountPath: /var/lib/mysql
+          name: mysql
+      restartPolicy: Always
+      securityContext: {}
+      volumes:
+      - name: mysql
+        persistentVolumeClaim:
+          claimName: gp2-mysql-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gp2-mysql-pvc
+  namespace: dummydbnamespace
+  labels:
+    app: mysql
+spec:
+#  storageClassName: gp2
+  storageClassName: px-db
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: mysql-wp
+  name: mysql-wp-svc
+  namespace: dummydbnamespace
+spec:
+  ports:
+  - port: 3306
+    protocol: TCP
+    targetPort: 3306
+  selector:
+    app: mysql-wp
+  type: ClusterIP

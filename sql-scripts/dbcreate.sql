@@ -1,5 +1,3 @@
-CREATE DATABASE wpdbtest;
-
-GRANT ALL PRIVILEGES ON wpdbtest.* TO "wpadmin"@"%" IDENTIFIED BY "password";
-
+CREATE DATABASE dummydb;
+GRANT ALL PRIVILEGES ON dummydb.* TO "dummyuser"@"%" IDENTIFIED BY "dummypass";
 FLUSH PRIVILEGES;

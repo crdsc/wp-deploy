@@ -6,93 +6,73 @@ pipeline {
       timestamps()
     }
 
-    environment {
-      //Use Pipeline Utility Steps plugin to read information from pom.xml into env variables
-        BUILD_NUMBER = '1'
-        IMAGE = 'wp-mysql-db'
-        LIMAGE = 'poyaskov/wp-mysql-db'
-        VERSION = "0.${BUILD_NUMBER}"
-        TAG = "${BUILD_NUMBER}"
-        INC="0.1"
-    }
-
     stages {
 
 
         stage('Build MySQL DB image and push to the registry') {
             steps {
-                sh """
-                    ls -l
-                    docker pull mariadb:latest
-                    docker build --build-arg dummy_pass=$dummy_pass -t ${IMAGE} .
-                    docker tag ${IMAGE} ${LIMAGE}:${VERSION}
-                    docker push ${LIMAGE}:${VERSION}
-                """
+                sh '''
+                ls -l
+                docker pull mariadb:latest
+                docker build --build-arg dummy_pass=$dummy_pass -t $IMAGE .
+                docker tag $IMAGE $LIMAGE:$VERSION
+                docker push $LIMAGE:$VERSION
+                '''
             }
-        }
-
-        stage('Deploy K8S Cluster to AWS'){
-           steps {
-
-
-              withEnv(['KOPS_STATE_STORE=s3://k8s-crdsc-org']) {
-
-                 sh """
-                    echo $KOPS_STATE_STORE
-                    // kops get k8s.crdsmartcity.org --state=$KOPS_STATE_STORE
-                    CLUSTER_STATE=`kops get k8s.crdsmartcity.org --state=s3://k8s-crdsc-org`
-                 """
-              }
-
-              withEnv(["AWS_ACCESS_KEY_ID=${env.AWS_ACCESS_KEY_ID}",
-                 "AWS_SECRET_ACCESS_KEY=${env.AWS_SECRET_ACCESS_KEY}",
-                 "AWS_DEFAULT_REGION=${env.AWS_DEFAULT_REGION}"]) {
-                 
-                 sh """
-                    echo $KOPS_STATE_STORE
-                    kops create cluster --name k8s.crdsmartcity.org --zones ca-central-1a --state $KOPS_STATE_STORE --yes
-                 """
-              }
-
-              withEnv(["AWS_ACCESS_KEY_ID=${env.AWS_ACCESS_KEY_ID}",
-                 "AWS_SECRET_ACCESS_KEY=${env.AWS_SECRET_ACCESS_KEY}",
-                 "AWS_DEFAULT_REGION=${env.AWS_DEFAULT_REGION}"]) {
-                 
-                 sh """
-                    echo $KOPS_STATE_STORE
-                    kops get k8s.crdsmartcity.org --state=$KOPS_STATE_STORE
-                 """
-              }
-
-           }
         }
 
         stage('Deploy kubectl and apply kubectl-config to the agent') {
             steps {
-                sh """
-                    sudo apt-get update && sudo apt-get install -y kubectl
+                sh '''
+                    hostname
+                    sudo apt-get update -y && sudo apt-get install -y kubectl
                     mkdir -p ~/.kube/
-                    scp vadim@158.50.25.21:~/.kube/config ~/.kube/
+                    scp "${KubeConfigSafe}":~/.kube/config ~/.kube/
                     kubectl get nodes
-                """
+                '''
             }
         }
 
-        stage('Deploy new image to k8s cluster') {
+        stage('Deploy MySQL image to k8s cluster') {
             steps {
-                sh """
-                    sed -i "/image/ s/latest/\${VERSION}/" files/test-webapp-deploy.yaml
-                    kubectl -n \${NAMESPACE} apply -f files/test-webapp-deploy.yaml
-                    kubectl -n \${NAMESPACE} get pod |grep -v NAME | awk '{ print \$1 }'| xargs -i kubectl -n \${NAMESPACE} delete pod {}
-                """
+                sh '''
+                    sed -i "/image/ s/latest/\${VERSION}/" k8s-deployment/mysql/mysql-deploy.yaml
+                    kubectl -n $DBNAMESPACE apply -f k8s-deployment/mysql/mysql-deploy.yaml
+                    kubectl -n $DBNAMESPACE get pod |grep -v NAME | awk '{ print $1 }'| xargs -i kubectl -n $DBNAMESPACE delete pod {}
+                    SECRET_STATE=`kubectl -n $DBNAMESPACE get secret mysql-pass -o jsonpath={.data.password} 2>/dev/null`
+                    echo $SECRET_STATE 
+                    if [ ! -z $SECRET_STATE ]
+                       then
+                         echo "MySQL Secrey Already exists."
+                       else
+                         echo "Create k8s secret from literal"
+                         kubectl -n $DBNAMESPACE create secret generic mysql-pass --from-literal=password=$dummy_pass
+                    fi
+                '''
             }
         }
 
-        stage('Test k8s web-app pod status') {
+        stage('Deploy WP image to k8s cluster') {
             steps {
-                sh """
-                    kubectl -n ${NAMESPACE} get pod
-                """
+                sh '''
+                    sed -i "/image/ s/latest/\$VERSION/" k8s-deployment/wp-app/wordpress-deployment.yaml
+                    kubectl -n $NAMESPACE apply -f k8s-deployment/wp-app/wordpress-deployment.yaml
+                    kubectl -n $NAMESPACE get pod |grep -v NAME | awk '{ print \$1 }'| xargs -i kubectl -n $NAMESPACE delete pod {}
+                '''
+            }
+        }
+
+        stage('Check WP MySQL pod status') {
+            steps {
+                sh '''
+                    DB_STATE=""
+                    DB_STATE=`kubectl -n ${DBNAMESPACE} get pod -l app=mysql -o jsonpath='{.items[*].status.containerStatuses[0].ready}'`
+                    WP_STATE="`kubectl -n ${NAMESPACE} get pod -l app=wordpress -o jsonpath='{.items[*].status.containerStatuses[0].ready}'`"
+                    
+                    if [! $DB_STATE ] 
+                       then echo "DB MySQL deployed with errors"
+                    fi
+                '''
             }
         }
 
