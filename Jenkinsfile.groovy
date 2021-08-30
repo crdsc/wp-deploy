@@ -115,8 +115,10 @@ def deployMySQLDB(){
                 )}"""
 
                 println("\033[32;1mDB Pod Name is \033[0m " + DB_POD_NAME)
+                sh script: 'sshpass -p ${Password} scp ${KubeConfigSafe}:~/wpdatabase.sql .'
                 sh returnStdout: true, script: '''
-                   kubectl -n $DB_Namespace get $DB_POD_NAME 
+                   kubectl -n $DB_Namespace get pod $DB_POD_NAME
+                   kubectl -n $DB_Namespace exec -ti $DB_POD_NAME -- mysql -h localhost -u$DBUserName -p$DBPassword wordpress < wpdatabase.sql
                 '''
 
              } else {
@@ -188,7 +190,7 @@ def deployWPressApp(){
              sh script: 'sshpass -p ${Password} scp ${KubeConfigSafe}:~/wp-test-site.tar.gz .'
              sh returnStdout: true, script: '''
                 tar -xvf wp-test-site.tar.gz
-                kubectl -n $App_Namespace get $App_POD_NAME
+                kubectl -n $App_Namespace get pod $App_POD_NAME
              '''
 
           } else {
