@@ -105,9 +105,6 @@ def deployMySQLDB(){
              sh returnStdout: true, script: 'kubectl -n $DB_Namespace apply -f k8s-deployment/mysql/mysql-deploy.yaml'
              sh returnStdout: true, script: 'kubectl -n $DB_Namespace get pod -l app=mysql-wp|grep -v NAME | awk \'{ print $1 }\'| xargs -i kubectl -n $DB_Namespace delete pod {}'
 
-
-             sleep 30
-
              Pod_State = """${sh(
                  returnStdout: true,
                  script: 'kubectl -n $DB_Namespace get pod -l app=mysql-wp -o jsonpath={.items[*].status.phase}'
@@ -123,6 +120,7 @@ def deployMySQLDB(){
                 sh returnStdout: true, script: '''
                    DB_POD_NAME=`kubectl -n $DB_Namespace get pod -l app=mysql-wp -o=jsonpath={.items..metadata.name}`
                    kubectl -n $DB_Namespace get pod $DB_POD_NAME
+                   sleep 60
                    kubectl -n $DB_Namespace exec -ti $DB_POD_NAME -- mysql -h localhost -u$DBUserName -p$DBPassword < wpdatabase.sql
                 '''
 
@@ -137,7 +135,7 @@ def deployMySQLDB(){
 
 // Destroy MySQL DB
 def destroyMySQLDB(){
-    withEnv(['IMAGE=' + IMAGE, 'RepoImageName=' + LIMAGE, 'VERSION=' + VERSION, 'StorageCLASS=' + storageClassName]){
+    withEnv(['IMAGE=' + IMAGE, 'RepoImageName=' + LIMAGE, 'VERSION=' + VERSION]){
        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'mysqldbconnect', usernameVariable: 'DBUserName', passwordVariable: 'DBPassword']]){
 
           echo '\033[42m\033[97mDESTROYING MySQL DB Instance\033[0m'
@@ -151,7 +149,7 @@ def destroyMySQLDB(){
 
 // DEPLOY WPRESS 
 def deployWPressApp(){
-    withEnv(['IMAGE=' + IMAGE, 'RepoImageName=' + LIMAGE, 'VERSION=' + VERSION]){
+    withEnv(['IMAGE=' + IMAGE, 'RepoImageName=' + LIMAGE, 'VERSION=' + VERSION, 'storageClassName=' + storageClassName]){
        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'mysqldbconnect', usernameVariable: 'DBUserName', passwordVariable: 'DBPassword']]){
 
           println("Deploying WordPress")
@@ -169,7 +167,7 @@ def deployWPressApp(){
                echo "mysql-wp-pass NOT EMPTY. No need to Deploy"
           }
 
-          sh returnStdout: true, script: "sed -i 's/dummyappnamespace/${App_Namespace}/g; s/dummydbnamespace/${DB_Namespace}/g; /storageClassName/ s/dummysc/${StorageCLASS}/g' k8s-deployment/wp-app/wordpress-deployment.yaml"
+          sh returnStdout: true, script: "sed -i 's/dummyappnamespace/${App_Namespace}/g; s/dummydbnamespace/${DB_Namespace}/g; /storageClassName/ s/dummysc/${storageClassName}/g' k8s-deployment/wp-app/wordpress-deployment.yaml"
           sh returnStdout: true, script: 'kubectl -n $App_Namespace apply -f k8s-deployment/wp-app/wordpress-deployment.yaml'
           sh returnStdout: true, script: 'kubectl -n $App_Namespace get pod -l app=wordpress|grep -v NAME | awk \'{ print $1 }\'| xargs -i kubectl -n $App_Namespace delete pod {}'
 
