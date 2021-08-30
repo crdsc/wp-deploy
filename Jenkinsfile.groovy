@@ -193,8 +193,7 @@ stage("Deploy MySQL DB"){
        withEnv(['KubeConfigSafe=' + KubeConfigSafe, 'RepoImageName=' + LIMAGE, 'VERSION=' + VERSION]){
           withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'Jenkins_KubeMaster', usernameVariable: 'UserName', passwordVariable: 'Password']]){
 
-             echo '[Pipeline][INFO] Deploy MySQL(MariaDB) to the k8s Cluster...'
-
+             echo '\033[34m[Pipeline][INFO] Deploy/Destroy MySQL(MariaDB) to the k8s Cluster...\033[0m'
              sh 'mkdir -p ~/.kube/'
              sh script: 'sshpass -p ${Password} scp ${KubeConfigSafe}:~/.kube/config ~/.kube/'
              sh 'kubectl get nodes'
@@ -236,14 +235,14 @@ stage("WPress App Activity"){
        withEnv(['KubeConfigSafe=' + KubeConfigSafe, 'RepoImageName=' + LIMAGE, 'VERSION=' + VERSION]){
           withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'Jenkins_KubeMaster', usernameVariable: 'UserName', passwordVariable: 'Password']]){
 
-             echo '[Pipeline][INFO] Deploy WordPress App to the k8s Cluster...'
+             echo '\033[34m[Pipeline][INFO] Deploy/Destroy WordPress App to the k8s Cluster...\033[0m'
 
              NS_State = """${sh(
                                  returnStdout: true,
                                  script: 'kubectl get ns $App_Namespace 2>/dev/null || true'
              )}"""
 
-             println("EWP App NameSpace status:" + NS_State )
+             println("WP App NameSpace status:" + NS_State )
 
              SECRET_STATE = """${sh(
                                  returnStdout: true,
