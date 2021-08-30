@@ -71,7 +71,7 @@ def buildCustomMySQLImage(){
 // Deploy MySQL DB
 def deployMySQLDB(){
     withEnv(['IMAGE=' + IMAGE, 'RepoImageName=' + LIMAGE, 'VERSION=' + VERSION]){
-       withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'mysqldbconnect', usernameVariable: 'DBUserName', passwordVariable: 'DBPassword']]){
+       withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'mysqldbadmin', usernameVariable: 'DBUserName', passwordVariable: 'DBPassword']]){
 
           ansiColor('vga') {
              echo '\033[42m\033[97mDEPLOYING MySQL Instance\033[0m'
@@ -82,10 +82,8 @@ def deployMySQLDB(){
                } else {
                   echo "Namespace  ${DB_Namespace} Already EXISTs"
              }
-             echo "Secret value: $SECRET_STATE"
-             someVar = "${SECRET_STATE}"
              
-             if(someVar.isEmpty()){
+             if("${SECRET_STATE}".isEmpty()){
                   echo "mysql-wp-pass is EMPTRY"
                   sh returnStdout: true, script: "kubectl -n $DB_Namespace create secret generic mysql-wp-pass --from-literal=username=$DBUserName --from-literal=password=$DBPassword"
                } else {
@@ -109,14 +107,10 @@ def deployMySQLDB(){
              if( "${Pod_State}".trim().equals("Running") ){
 
                 println("\033[32;1mPod_State is \033[0m " + Pod_State + " \033[32;1m and working\033[0m ")
-                DB_POD_NAME = """${sh(
-                   returnStdout: true,
-                   script: 'kubectl -n $DB_Namespace get pod -l app=mysql-wp -o=jsonpath={.items..metadata.name} || true'
-                )}"""
 
-                println("\033[32;1mDB Pod Name is \033[0m " + DB_POD_NAME)
                 sh script: 'sshpass -p ${Password} scp ${KubeConfigSafe}:~/wpdatabase.sql .'
                 sh returnStdout: true, script: '''
+                   DB_POD_NAME=`kubectl -n $DB_Namespace get pod -l app=mysql-wp -o=jsonpath={.items..metadata.name}`
                    kubectl -n $DB_Namespace get pod $DB_POD_NAME
                    kubectl -n $DB_Namespace exec -ti $DB_POD_NAME -- mysql -h localhost -u$DBUserName -p$DBPassword wordpress < wpdatabase.sql
                 '''
