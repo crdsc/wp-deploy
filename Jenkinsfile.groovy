@@ -271,12 +271,12 @@ stage("WPress App Activity"){
                  println("\033[32;1mPod_State is \033[0m " + Pod_State + " \033[32;1m and working\033[0m ")
                  DB_POD_NAME = """${sh(
                     returnStdout: true,
-                    kubectl -n $DB_Namespace get pod -l app=mysql-wp -o=jsonpath={.items..metadata.name} || true
+                    script: 'kubectl -n $DB_Namespace get pod -l app=mysql-wp -o=jsonpath={.items..metadata.name} || true'
                  )}"""
 
                  APP_POD_NAME = """${sh(
                     returnStdout: true,
-                    kubectl -n $App_Namespace get pod -l app=wordpress -o=jsonpath={.items..metadata.name} || true
+                    script: 'kubectl -n $App_Namespace get pod -l app=wordpress -o=jsonpath={.items..metadata.name} || true'
                  )}"""
 
                  println("\033[32;1mApp Pod Name is \033[0m " + APP_POD_NAME)
