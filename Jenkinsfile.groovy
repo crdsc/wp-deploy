@@ -40,8 +40,8 @@ def validateInputs(){
         error "\u001b[1;31m DB user password cannot be empty!\u001b[0m"
         currentBuild.result = 'FAILURE'
     }
-    if(App_DEPLOY.isEmpty() && App_DESTROY.isEmpty()){
-        error "\u001b[1;31m Both, Deploy or Destyroy did not checked out. Please make your choice\u001b[0m"
+    if( ClusterActivity.isEmpty() ){
+        error "\u001b[1;31m Both, Deploy or Destroy did not checked out. Please make your choice\u001b[0m"
         currentBuild.result = 'FAILURE'
     }
   }
@@ -51,24 +51,30 @@ def buildCustomMySQLImage(){
     withEnv(['IMAGE=' + IMAGE, 'RepoImageName=' + LIMAGE, 'VERSION=' + VERSION, "DBImageNAME=" + DBImageNAME]){
        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'mysqldbconnect', usernameVariable: 'DBUserName', passwordVariable: 'DBPassword']]){
 
-       sh returnStdout: true, script: "sed -i 's/dummydb/wpdbtest/g; s/dummyuser/${DBUserName}/g; s/dummypass/${DBPassword}/g' sql-scripts/dbcreate.sql"
+          if(env.ClusterActivity.equals("Deploy")){
 
-       sh 'docker pull $DBImageNAME'
-       sh returnStdout: true, script: "docker build --build-arg dummy_image='${DBImageNAME}' --build-arg dummy_pass=${DBPassword} -t $IMAGE:$VERSION ."
-       sh 'docker tag $IMAGE:$VERSION $LIMAGE:$VERSION'
-       sh 'docker push $LIMAGE:$VERSION'
+             sh returnStdout: true, script: "sed -i 's/dummydb/wpdbtest/g; s/dummyuser/${DBUserName}/g; s/dummypass/${DBPassword}/g' sql-scripts/dbcreate.sql"
 
+             sh 'docker pull $DBImageNAME'
+             sh returnStdout: true, script: "docker build --build-arg dummy_image='${DBImageNAME}' --build-arg dummy_pass=${DBPassword} -t $IMAGE:$VERSION ."
+             sh 'docker tag $IMAGE:$VERSION $LIMAGE:$VERSION'
+             sh 'docker push $LIMAGE:$VERSION'
+         
+          } else {
+            println("In DESTROY Stage you don't need to build a new Docker Image")
+          }
 
        }
    }
 }
+
 // Deploy MySQL DB
 def deployMySQLDB(){
     withEnv(['IMAGE=' + IMAGE, 'RepoImageName=' + LIMAGE, 'VERSION=' + VERSION]){
        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'mysqldbconnect', usernameVariable: 'DBUserName', passwordVariable: 'DBPassword']]){
 
           ansiColor('vga') {
-             echo '\033[42m\033[97mkubectl deployed and configured\033[0m'
+             echo '\033[42m\033[97mDEPLOYING MySQL Instance\033[0m'
              
              if(NS_State.isEmpty()){
                   echo "Namespace  ${DB_Namespace} does not exist"
@@ -94,6 +100,21 @@ def deployMySQLDB(){
        }
    }
 }
+
+// Destroy MySQL DB
+def destroyMySQLDB(){
+    withEnv(['IMAGE=' + IMAGE, 'RepoImageName=' + LIMAGE, 'VERSION=' + VERSION]){
+       withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'mysqldbconnect', usernameVariable: 'DBUserName', passwordVariable: 'DBPassword']]){
+
+          echo '\033[42m\033[97mDESTROYING MySQL DB Instance\033[0m'
+
+          sh returnStdout: true, script: "sed -i 's/dummydbnamespace/${DB_Namespace}/g' k8s-deployment/mysql/mysql-deploy.yaml"
+          sh returnStdout: true, script: 'kubectl -n $DB_Namespace delete -f k8s-deployment/mysql/mysql-deploy.yaml'
+
+       }
+   }
+}
+
 // DEPLOY WPRESS 
 def deployWPressApp(){
     withEnv(['IMAGE=' + IMAGE, 'RepoImageName=' + LIMAGE, 'VERSION=' + VERSION]){
@@ -117,6 +138,20 @@ def deployWPressApp(){
           sh returnStdout: true, script: "sed -i 's/dummyappnamespace/${App_Namespace}/g' k8s-deployment/wp-app/wordpress-deployment.yaml"
           sh returnStdout: true, script: 'kubectl -n $App_Namespace apply -f k8s-deployment/wp-app/wordpress-deployment.yaml'
           sh returnStdout: true, script: 'kubectl -n $App_Namespace get pod -l app=wordpress|grep -v NAME | awk \'{ print $1 }\'| xargs -i kubectl -n $App_Namespace delete pod {}'
+
+       }
+   }
+}
+
+// DESTROY WPRESS
+def destroyWPressApp(){
+    withEnv(['IMAGE=' + IMAGE, 'RepoImageName=' + LIMAGE, 'VERSION=' + VERSION]){
+       withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'mysqldbconnect', usernameVariable: 'DBUserName', passwordVariable: 'DBPassword']]){
+
+          println("Destroying WordPress")
+
+          sh returnStdout: true, script: "sed -i 's/dummyappnamespace/${App_Namespace}/g' k8s-deployment/wp-app/wordpress-deployment.yaml"
+          sh returnStdout: true, script: 'kubectl -n $App_Namespace delete -f k8s-deployment/wp-app/wordpress-deployment.yaml'
 
        }
    }
@@ -176,7 +211,11 @@ stage("Deploy MySQL DB"){
                                  script: 'kubectl -n $DB_Namespace get secret mysql-wp-pass -o jsonpath={.data.password} 2>/dev/null || true'
              )}"""
 
-             deployMySQLDB()
+             if(env.ClusterActivity.equals("Deploy")){
+                deployMySQLDB()
+                } else {
+                destroyMySQLDB()
+             }
              
              Pod_State = """${sh(
                                  returnStdout: true,
@@ -191,7 +230,7 @@ stage("Deploy MySQL DB"){
    }
 }
 
-stage("Deploy WPress App"){
+stage("WPress App Activity"){
     node("${env.NodeName}"){
     wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']){
        withEnv(['KubeConfigSafe=' + KubeConfigSafe, 'RepoImageName=' + LIMAGE, 'VERSION=' + VERSION]){
@@ -211,7 +250,11 @@ stage("Deploy WPress App"){
                                  script: 'kubectl -n $App_Namespace get secret mysql-wp-pass -o jsonpath={.data.password} 2>/dev/null || true'
              )}"""
 
-             deployWPressApp()
+             if(env.ClusterActivity.equals("Deploy")){
+                deployWPressApp()
+                } else {
+                destroyWPressApp()
+             }
 
              Pod_State = """${sh(
                                  returnStdout: true,
@@ -226,9 +269,3 @@ stage("Deploy WPress App"){
    }
 }
 
-stage("Check Deployment Condition"){
-    when([App_DEPLOY true]){ 
-
-        println("Print App_DEPLOY condition. Is:" + App_DEPLOY)
-    }
-}
