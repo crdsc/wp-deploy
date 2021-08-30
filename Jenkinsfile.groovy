@@ -174,17 +174,13 @@ def deployWPressApp(){
           if( "${Pod_State}".trim().equals("Running") ){
 
              println("\033[32;1mWordPress Pod_State is \033[0m " + Pod_State + " \033[32;1m and working\033[0m ")
-             App_POD_NAME = """${sh(
-                returnStdout: true,
-                script: 'kubectl -n $App_Namespace get pod -l app=wordpress -o=jsonpath={.items..metadata.name} || true'
-             )}"""
 
-
-             println("\033[32;1mApp Pod Name is \033[0m " + App_POD_NAME)
              sh script: 'sshpass -p ${Password} scp ${KubeConfigSafe}:~/wp-test-site.tar.gz .'
              sh returnStdout: true, script: '''
                 tar -xvf wp-test-site.tar.gz
+                App_POD_NAME=`kubectl -n $App_Namespace get pod -l app=wordpress -o=jsonpath={.items..metadata.name}`
                 kubectl -n $App_Namespace get pod $App_POD_NAME
+                kubectl cp var/www/html $App_Namespace/$APP_POD_NAME:/var/www/html
              '''
 
           } else {
