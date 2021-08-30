@@ -188,6 +188,9 @@ stage("Deploy MySQL DB"){
 }
 
 stage("Deploy WPress App"){
+    when {
+        App_DEPLOY true
+    }
     node("${env.NodeName}"){
     wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']){
        withEnv(['KubeConfigSafe=' + KubeConfigSafe, 'RepoImageName=' + LIMAGE, 'VERSION=' + VERSION]){
