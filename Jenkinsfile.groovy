@@ -22,10 +22,16 @@ import groovy.transform.Field
 @Field final String ansibleActions = 'ansibleChecks.groovy'
 @Field final String properties = 'Config/Prechecks_properties'
 
-def stCredentials(){
+def setCredentials(){
     withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'mysqldbconnect', usernameVariable: 'DBUserName', passwordVariable: 'DBPassword']]){
        mysqlCred = "${DBUserName}"
        mysqldbPass = "${DBPassword}"
+
+       if(k8sLocation.equals("AWS")){
+         def storageClassName = "gp2"
+       } else {
+         def storageClassName = "px-repl1-sc"
+       }
     }
 }
 
@@ -41,6 +47,11 @@ def validateInputs(){
         currentBuild.result = 'FAILURE'
     }
     if( ClusterActivity.isEmpty() ){
+        error "\u001b[1;31m Both, Deploy or Destroy did not checked out. Please make your choice\u001b[0m"
+        currentBuild.result = 'FAILURE'
+    }
+
+    if( k8sLocation.isEmpty() ){
         error "\u001b[1;31m Both, Deploy or Destroy did not checked out. Please make your choice\u001b[0m"
         currentBuild.result = 'FAILURE'
     }
@@ -126,7 +137,7 @@ def deployMySQLDB(){
 
 // Destroy MySQL DB
 def destroyMySQLDB(){
-    withEnv(['IMAGE=' + IMAGE, 'RepoImageName=' + LIMAGE, 'VERSION=' + VERSION]){
+    withEnv(['IMAGE=' + IMAGE, 'RepoImageName=' + LIMAGE, 'VERSION=' + VERSION, 'StorageCLASS=' + storageClassName]){
        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'mysqldbconnect', usernameVariable: 'DBUserName', passwordVariable: 'DBPassword']]){
 
           echo '\033[42m\033[97mDESTROYING MySQL DB Instance\033[0m'
@@ -158,7 +169,7 @@ def deployWPressApp(){
                echo "mysql-wp-pass NOT EMPTY. No need to Deploy"
           }
 
-          sh returnStdout: true, script: "sed -i 's/dummyappnamespace/${App_Namespace}/g' k8s-deployment/wp-app/wordpress-deployment.yaml"
+          sh returnStdout: true, script: "sed -i 's/dummyappnamespace/${App_Namespace}/g; s/dummydbnamespace/${DB_Namespace}/g; /storageClassName/ s/dummysc/${StorageCLASS}/g' k8s-deployment/wp-app/wordpress-deployment.yaml"
           sh returnStdout: true, script: 'kubectl -n $App_Namespace apply -f k8s-deployment/wp-app/wordpress-deployment.yaml'
           sh returnStdout: true, script: 'kubectl -n $App_Namespace get pod -l app=wordpress|grep -v NAME | awk \'{ print $1 }\'| xargs -i kubectl -n $App_Namespace delete pod {}'
 
@@ -210,7 +221,7 @@ stage("Build MyQSL Image"){
     wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']){
 
        echo '[Pipeline][INFO] Checkout Code from GitHub...'
-       stCredentials()
+       setCredentials()
        validateInputs()
        checkout scm
               
@@ -240,6 +251,9 @@ stage("MySQL DB Activity"){
     wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']){
        withEnv(['KubeConfigSafe=' + KubeConfigSafe, 'RepoImageName=' + LIMAGE, 'VERSION=' + VERSION]){
           withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'Jenkins_KubeMaster', usernameVariable: 'UserName', passwordVariable: 'Password']]){
+
+             setCredentials()
+             validateInputs()
 
              echo '\033[34m[Pipeline][INFO] Deploy/Destroy MySQL(MariaDB) to the k8s Cluster...\033[0m'
              sh 'mkdir -p ~/.kube/'
@@ -274,7 +288,10 @@ stage("WPress App Activity"){
        withEnv(['KubeConfigSafe=' + KubeConfigSafe, 'RepoImageName=' + LIMAGE, 'VERSION=' + VERSION]){
           withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'Jenkins_KubeMaster', usernameVariable: 'UserName', passwordVariable: 'Password']]){
 
-             echo '\033[34m[Pipeline][INFO] Deploy/Destroy WordPress App to the k8s Cluster...\033[0m'
+             setCredentials()
+             validateInputs()
+
+             echo '\033[34m[Pipeline][INFO] Deploy/Destroy WordPress App on the k8s Cluster...\033[0m'
 
              NS_State = """${sh(
                 returnStdout: true,
