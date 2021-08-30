@@ -167,7 +167,7 @@ def deployWPressApp(){
           }
 
           sh script: 'sshpass -p ${Password} scp ${KubeConfigSafe}:~/wp-config.php .'
-          sh returnStdout: true, script: 'kubectl create configmap wp-config --from-file=wp-config.php'
+          sh returnStdout: true, script: 'kubectl -n $App_Namespace create configmap wp-config --from-file=wp-config.php'
           sh returnStdout: true, script: "sed -i 's/dummyappnamespace/${App_Namespace}/g; s/dummydbnamespace/${DB_Namespace}/g; /storageClassName/ s/dummysc/${storageClassName}/g' k8s-deployment/wp-app/wordpress-deployment.yaml"
           sh returnStdout: true, script: 'kubectl -n $App_Namespace apply -f k8s-deployment/wp-app/wordpress-deployment.yaml'
           sh returnStdout: true, script: 'kubectl -n $App_Namespace get pod -l app=wordpress|grep -v NAME | awk \'{ print $1 }\'| xargs -i kubectl -n $App_Namespace delete pod {}'
