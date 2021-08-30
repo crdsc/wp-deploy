@@ -120,7 +120,7 @@ def deployMySQLDB(){
                 sh returnStdout: true, script: '''
                    DB_POD_NAME=`kubectl -n $DB_Namespace get pod -l app=mysql-wp -o=jsonpath={.items..metadata.name}`
                    kubectl -n $DB_Namespace get pod $DB_POD_NAME
-                   sleep 60
+                   sleep 90
                    kubectl -n $DB_Namespace exec -ti $DB_POD_NAME -- mysql -h localhost -u$DBUserName -p$DBPassword < wpdatabase.sql
                 '''
 
