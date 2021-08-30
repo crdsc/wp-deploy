@@ -31,7 +31,8 @@ spec:
             secretKeyRef:
               key: password
               name: mysql-wp-pass
-        image: mysql:5.7.31
+#        image: mysql:5.7.31
+        image: poyaskov/wp-mysql-db:0.2
         imagePullPolicy: IfNotPresent
         name: mysql
         ports:
