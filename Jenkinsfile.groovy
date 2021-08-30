@@ -95,6 +95,30 @@ def deployMySQLDB(){
              sh returnStdout: true, script: "sed -i 's/dummydbnamespace/${DB_Namespace}/g' k8s-deployment/mysql/mysql-deploy.yaml"
              sh returnStdout: true, script: 'kubectl -n $DB_Namespace apply -f k8s-deployment/mysql/mysql-deploy.yaml'
              sh returnStdout: true, script: 'kubectl -n $DB_Namespace get pod -l app=mysql-wp|grep -v NAME | awk \'{ print $1 }\'| xargs -i kubectl -n $DB_Namespace delete pod {}'
+
+
+             sleep 30
+
+             Pod_State = """${sh(
+                 returnStdout: true,
+                 script: 'kubectl -n $DB_Namespace get pod -l app=mysql-wp -o jsonpath={.items[*].status.phase}'
+             )}"""
+
+             println("MySQL Pod Status: " + Pod_State)
+
+             if( "${Pod_State}".trim().equals("Running") ){
+
+                println("\033[32;1mPod_State is \033[0m " + Pod_State + " \033[32;1m and working\033[0m ")
+                DB_POD_NAME = """${sh(
+                   returnStdout: true,
+                   script: 'kubectl -n $DB_Namespace get pod -l app=mysql-wp -o=jsonpath={.items..metadata.name} || true'
+                )}"""
+
+                println("\033[32;1mDB Pod Name is \033[0m " + DB_POD_NAME)
+
+             } else {
+                println("\033[31;1mPod_State is \033[0m " + Pod_State + " \033[31;1m and NOT working\033[0m ")
+             }
              
           }
        }
@@ -139,6 +163,34 @@ def deployWPressApp(){
           sh returnStdout: true, script: 'kubectl -n $App_Namespace apply -f k8s-deployment/wp-app/wordpress-deployment.yaml'
           sh returnStdout: true, script: 'kubectl -n $App_Namespace get pod -l app=wordpress|grep -v NAME | awk \'{ print $1 }\'| xargs -i kubectl -n $App_Namespace delete pod {}'
 
+          sleep 30
+
+          Pod_State = """${sh(
+              returnStdout: true,
+              script: 'kubectl -n $App_Namespace get pod -l app=wordpress -o jsonpath={.items[*].status.phase}'
+          )}"""
+
+          println("WordPress Pod Status: " + Pod_State)
+
+          if( "${Pod_State}".trim().equals("Running") ){
+
+             println("\033[32;1mWordPress Pod_State is \033[0m " + Pod_State + " \033[32;1m and working\033[0m ")
+             App_POD_NAME = """${sh(
+                returnStdout: true,
+                script: 'kubectl -n $App_Namespace get pod -l app=wordpress -o=jsonpath={.items..metadata.name} || true'
+             )}"""
+
+
+             println("\033[32;1mApp Pod Name is \033[0m " + App_POD_NAME)
+
+          } else {
+             println("\033[31;1mWordPress Pod State is \033[0m " + Pod_State + " \033[31;1m and NOT working\033[0m ")
+          }
+
+          sh script: 'sshpass -p ${Password} scp ${KubeConfigSafe}:~/wp-test-site.tar.gz .'
+          sh returnStdout: true,script: '''
+              tar -xvf wp-test-site.tar.gz
+          '''
        }
    }
 }
@@ -198,15 +250,15 @@ stage("MySQL DB Activity"){
              sh script: 'sshpass -p ${Password} scp ${KubeConfigSafe}:~/.kube/config ~/.kube/'
 
              NS_State = """${sh(
-                                 returnStdout: true,
-                                 script: 'kubectl get ns $DB_Namespace 2>/dev/null || true'  
+                returnStdout: true,
+                script: 'kubectl get ns $DB_Namespace 2>/dev/null || true'  
              )}"""
 
              println("NameSpace status:" + NS_State )
 
              SECRET_STATE = """${sh(
-                                 returnStdout: true,
-                                 script: 'kubectl -n $DB_Namespace get secret mysql-wp-pass -o jsonpath={.data.password} 2>/dev/null || true'
+                returnStdout: true,
+                script: 'kubectl -n $DB_Namespace get secret mysql-wp-pass -o jsonpath={.data.password} 2>/dev/null || true'
              )}"""
 
              if(env.ClusterActivity.equals("Deploy")){
@@ -214,14 +266,6 @@ stage("MySQL DB Activity"){
                 } else {
                 destroyMySQLDB()
              }
-             
-             Pod_State = """${sh(
-                                 returnStdout: true,
-                                 script: 'kubectl -n $DB_Namespace get pod -l app=mysql-wp -o jsonpath={.items[*].status.phase}'
-             )}"""
-             
-             println("MySQL Pod Status: " + Pod_State)
-
           }
        }
    }
@@ -237,15 +281,15 @@ stage("WPress App Activity"){
              echo '\033[34m[Pipeline][INFO] Deploy/Destroy WordPress App to the k8s Cluster...\033[0m'
 
              NS_State = """${sh(
-                                 returnStdout: true,
-                                 script: 'kubectl get ns $App_Namespace 2>/dev/null || true'
+                returnStdout: true,
+                script: 'kubectl get ns $App_Namespace 2>/dev/null || true'
              )}"""
 
              println("WP App NameSpace status:" + NS_State )
 
              SECRET_STATE = """${sh(
-                                 returnStdout: true,
-                                 script: 'kubectl -n $App_Namespace get secret mysql-wp-pass -o jsonpath={.data.password} 2>/dev/null || true'
+                returnStdout: true,
+                script: 'kubectl -n $App_Namespace get secret mysql-wp-pass -o jsonpath={.data.password} 2>/dev/null || true'
              )}"""
 
              if(env.ClusterActivity.equals("Deploy")){
@@ -253,39 +297,6 @@ stage("WPress App Activity"){
                 } else {
                 destroyWPressApp()
              }
-
-             Pod_State = """${sh(
-                                 returnStdout: true,
-                                 script: 'kubectl -n $App_Namespace get pod -l app=wordpress -o jsonpath={.items[*].status.phase}'
-             )}"""
-
-             println("WordPrtess Pod Status: " + Pod_State)
-
-             sh script: 'sshpass -p ${Password} scp ${KubeConfigSafe}:~/wp-test-site.tar.gz .'
-             sh returnStdout: true,script: '''
-                 tar -xvf wp-test-site.tar.gz
-             '''              
-
-             if( "${Pod_State}".trim().equals("Running") ){
-              
-                 println("\033[32;1mPod_State is \033[0m " + Pod_State + " \033[32;1m and working\033[0m ")
-                 DB_POD_NAME = """${sh(
-                    returnStdout: true,
-                    script: 'kubectl -n $DB_Namespace get pod -l app=mysql-wp -o=jsonpath={.items..metadata.name} || true'
-                 )}"""
-
-                 APP_POD_NAME = """${sh(
-                    returnStdout: true,
-                    script: 'kubectl -n $App_Namespace get pod -l app=wordpress -o=jsonpath={.items..metadata.name} || true'
-                 )}"""
-
-                 println("\033[32;1mApp Pod Name is \033[0m " + APP_POD_NAME)
-                 println("\033[32;1mDB Pod Name is \033[0m " + DB_POD_NAME)
-
-             } else {
-                 println("\033[31;1mPod_State is \033[0m " + Pod_State + " \033[31;1m and NOT working\033[0m ")
-             }
-
           }
        }
    }
