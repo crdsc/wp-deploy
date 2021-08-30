@@ -111,7 +111,7 @@ def deployMySQLDB(){
              )}"""
 
              println("MySQL Pod Status: " + Pod_State)
-
+             sleep 30
              if( "${Pod_State}".trim().equals("Running") ){
 
                 println("\033[32;1mPod_State is \033[0m " + Pod_State + " \033[32;1m and working\033[0m ")
