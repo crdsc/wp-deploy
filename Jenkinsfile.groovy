@@ -227,8 +227,7 @@ stage("Deploy WPress App"){
 }
 
 stage("Check Deployment Condition"){
-    when {
-        App_DEPLOY true
+    when([App_DEPLOY true]){ 
 
         println("Print App_DEPLOY condition. Is:" + App_DEPLOY)
     }
