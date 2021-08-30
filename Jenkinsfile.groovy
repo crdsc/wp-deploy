@@ -41,7 +41,7 @@ def validateInputs(){
         currentBuild.result = 'FAILURE'
     }
     if(App_DEPLOY.isEmpty() && App_DESTROY.isEmpty()){
-        error "\u001b[1;31m Both, Deploy or Destyroy did not checked out. Please make your choice\u001b[0m"
+        error "\u001b[1;31m Both, Deploy and Destroy did not checked out. Please make your choice\u001b[0m"
         currentBuild.result = 'FAILURE'
     }
   }
