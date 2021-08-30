@@ -115,6 +115,9 @@ def deployMySQLDB(){
                 )}"""
 
                 println("\033[32;1mDB Pod Name is \033[0m " + DB_POD_NAME)
+                sh returnStdout: true, script: '''
+                   kubectl -n $DB_Namespace get $DB_POD_NAME 
+                '''
 
              } else {
                 println("\033[31;1mPod_State is \033[0m " + Pod_State + " \033[31;1m and NOT working\033[0m ")
@@ -182,15 +185,16 @@ def deployWPressApp(){
 
 
              println("\033[32;1mApp Pod Name is \033[0m " + App_POD_NAME)
+             sh script: 'sshpass -p ${Password} scp ${KubeConfigSafe}:~/wp-test-site.tar.gz .'
+             sh returnStdout: true, script: '''
+                tar -xvf wp-test-site.tar.gz
+                kubectl -n $App_Namespace get $App_POD_NAME
+             '''
 
           } else {
              println("\033[31;1mWordPress Pod State is \033[0m " + Pod_State + " \033[31;1m and NOT working\033[0m ")
           }
 
-          sh script: 'sshpass -p ${Password} scp ${KubeConfigSafe}:~/wp-test-site.tar.gz .'
-          sh returnStdout: true,script: '''
-              tar -xvf wp-test-site.tar.gz
-          '''
        }
    }
 }
