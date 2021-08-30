@@ -213,11 +213,9 @@ stage("Deploy MySQL DB"){
 
              if(env.ClusterActivity.equals("Deploy")){
                 deployMySQLDB()
-                }
-
-             if(env.ClusterActivity.equals("Destroy")){
+                } else {
                 destroyMySQLDB()
-                }
+             }
              
              Pod_State = """${sh(
                                  returnStdout: true,
@@ -255,9 +253,8 @@ stage("WPress App Activity"){
              if(env.ClusterActivity.equals("Deploy")){
                 deployWPressApp()
                 } else {
-
                 destroyWPressApp()
-                }
+             }
 
              Pod_State = """${sh(
                                  returnStdout: true,
