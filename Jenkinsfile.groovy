@@ -262,15 +262,21 @@ stage("WPress App Activity"){
 
              println("WordPrtess Pod Status: " + Pod_State)
 
-             if( Pod_State.equals("Running") ){
-              sh script: 'sshpass -p ${Password} scp ${KubeConfigSafe}:~/wp-test-site.tar.gz .'
-              sh returnStdout: true,script: '''
+             sh script: 'sshpass -p ${Password} scp ${KubeConfigSafe}:~/wp-test-site.tar.gz .'
+             sh returnStdout: true,script: '''
 
                  tar -xvf wp-test-site.tar.gz
                  ls -l
-              ''' 
+             '''              
 
+             if( "${Pod_State}".trim().equals("Running") ){
+              
+                 println("\033[35mPod_State is \033[0m " + Pod_State + " \033[35m and working\033[0m ")
+
+             } else {
+                 println("\033[31;1mPod_State is \033[0m " + Pod_State + " \033[31;1m and NOT working\033[0m ")
              }
+
           }
        }
    }
