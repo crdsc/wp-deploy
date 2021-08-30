@@ -196,7 +196,6 @@ stage("MySQL DB Activity"){
              echo '\033[34m[Pipeline][INFO] Deploy/Destroy MySQL(MariaDB) to the k8s Cluster...\033[0m'
              sh 'mkdir -p ~/.kube/'
              sh script: 'sshpass -p ${Password} scp ${KubeConfigSafe}:~/.kube/config ~/.kube/'
-             sh 'kubectl get nodes'
 
              NS_State = """${sh(
                                  returnStdout: true,
@@ -271,7 +270,7 @@ stage("WPress App Activity"){
 
              if( "${Pod_State}".trim().equals("Running") ){
               
-                 println("\033[35mPod_State is \033[0m " + Pod_State + " \033[35m and working\033[0m ")
+                 println("\033[32;1mPod_State is \033[0m " + Pod_State + " \033[32;1m and working\033[0m ")
 
              } else {
                  println("\033[31;1mPod_State is \033[0m " + Pod_State + " \033[31;1m and NOT working\033[0m ")
