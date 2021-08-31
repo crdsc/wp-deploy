@@ -88,7 +88,7 @@ def buildCustomWPImage(){
 
              sh script: 'sshpass -p ${Password} scp ${KubeConfigSafe}:~/wp-test-site.tar.gz .'
              sh returnStdout: true, script: "tar -xvf wp-test-site.tar.gz; sed -i 's/dummyhost/${DBHostName}/g; s/dummyuser/${DBUserName}/g; s/dummypass/${DBPassword}/g' var/www/html/wp-config.php"
-             sh returnStdout: true, script: "docker pull $WPImageNAME; docker build -t $LWPIMAGE:$VERSION -f Dockerfile-wp . ; docker push $LWPIMAGE:$VERSION"
+             sh returnStdout: true, script: "docker pull $WPImageNAME; docker build -t $LWPIMAGE:$VERSION -f DockerfileWP . ; docker push $LWPIMAGE:$VERSION"
 
           } else {
             println("In DESTROY Stage you don't need to build a new Docker Image")
