@@ -1,0 +1,5 @@
+# FROM wordpress:5.8-apache
+FROM $dummy_image as builder
+
+COPY ./var/www/html /var/www/html
+
