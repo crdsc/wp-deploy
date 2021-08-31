@@ -255,20 +255,23 @@ stage("Build MyQSL Image"){
 //Stage to build Custom WordPress Image
 stage("Build WordPress Image"){
     node("${env.NodeName}"){
-    wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']){
+    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'Jenkins_KubeMaster', usernameVariable: 'UserName', passwordVariable: 'Password']]){
+       wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']){
 
-       echo '[Pipeline][INFO] Build WordPress Custom Image...'
-       setCredentials()
-       validateInputs()
-       checkout scm
+          echo '[Pipeline][INFO] Build WordPress Custom Image...'
+          setCredentials()
+          validateInputs()
+          checkout scm
 
-       buildCustomWPImage()
+          buildCustomWPImage()
 
-       echo '\033[34mThis stage has built WordPressB image and pushed it to the DockerHub\033[0m'
+          echo '\033[34mThis stage has built WordPressB image and pushed it to the DockerHub\033[0m'
+          }
        }
     }
 }
 
+// Stage to install and config  kubectl locally on the agent
 stage("Kubectl config"){
     node("${env.NodeName}"){
     withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'Jenkins_KubeMaster', usernameVariable: 'UserName', passwordVariable: 'Password']]){
