@@ -1,0 +1,4 @@
+FROM wordpress:5.8-apache
+
+COPY ./var/www/html /var/www/html
+

@@ -1,20 +1,17 @@
 ---
 apiVersion: v1
-kind: Namespace
-metadata:
-  labels:
-  name: wp-test
----
-apiVersion: v1
 kind: Service
 metadata:
   name: wordpress
-  namespace: wp-test
+  namespace: dummyappnamespace
   labels:
     app: wordpress
 spec:
   ports:
-    - port: 80
+  - nodePort: 32669
+    port: 80
+    protocol: TCP
+    targetPort: 80
   selector:
     app: wordpress
     tier: frontend
@@ -24,11 +21,11 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: gp2-wp-pvc
-  namespace: wp-test
+  namespace: dummyappnamespace
   labels:
     app: wordpress
 spec:
-  storageClassName: gp2
+  storageClassName: dummysc
   accessModes:
     - ReadWriteOnce
   resources:
@@ -39,7 +36,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: wordpress
-  namespace: wp-test
+  namespace: dummyappnamespace
   labels:
     app: wordpress
 spec:
@@ -56,15 +53,15 @@ spec:
         tier: frontend
     spec:
       containers:
-      - image: wordpress:5.8-apache
+      - image: poyaskov/wp:0.2
         name: wordpress
         env:
         - name: WORDPRESS_DB_HOST
-          value: mysql-svc.databases.svc.cluster.local
+          value: mysql-wp-svc.dummydbnamespace.svc.cluster.local
         - name: WORDPRESS_DB_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: mysql-pass
+              name: mysql-wp-pass
               key: password
         ports:
         - containerPort: 80
@@ -72,8 +69,21 @@ spec:
         volumeMounts:
         - name: wordpress-persistent-storage
           mountPath: /var/www/html
+        - mountPath: /var/www/html/wp-config.php
+          name: wp-config
+          subPath: wp-config.php
+        resources:
+          limits:
+            cpu: 250m
+            memory: 256Mi
+          requests:
+            cpu: 250m
+            memory: 256Mi
       volumes:
       - name: wordpress-persistent-storage
         persistentVolumeClaim:
           claimName: gp2-wp-pvc
+      - name: wp-config
+        configMap:
+          name: wp-config
 
