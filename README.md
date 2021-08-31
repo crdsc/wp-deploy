@@ -25,6 +25,11 @@ There is the CI/CD pipoeline on the Jenkins.
 This project is parameterized. Jenkinsfile is here: [Jenkinsfile.groovy](Jenkinsfile.groovy)
 
 
+
+Jenkins web-console: [jenkins.crdsmart.city](https://jenkins.crdsmart.city/)
+
+
+
 Deployed to the on-prem k8s cluster application can be acccessible here [resulta.itman.today](https://resulta.itman.today/)
 
 
