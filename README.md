@@ -16,6 +16,11 @@ Example project to deploy WP to k8s cluster
 9. Update AWS Route53 hosted zones for the deployed apps
 
 
+Demo Web-application an be deployed to the AWS or on-Prem Kubernetes Cluster.
+
+There is the CI/CD pipoeline on the Jenkins.
+
+This project is parameterized. Jenkinsfile is here
 
 
 
