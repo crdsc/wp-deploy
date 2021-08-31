@@ -57,8 +57,9 @@ def validateInputs(){
   }
 }
 
+//Custom MySQL Docker Image Building
 def buildCustomMySQLImage(){
-    withEnv(['IMAGE=' + IMAGE, 'RepoImageName=' + LIMAGE, 'VERSION=' + VERSION, "DBImageNAME=" + DBImageNAME]){
+    withEnv(['IMAGE=' + IMAGE, 'RepoImageName=' + LIMAGE, 'VERSION=' + VERSION, 'DBImageNAME=' + DBImageNAME]){
        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'mysqldbconnect', usernameVariable: 'DBUserName', passwordVariable: 'DBPassword']]){
 
           if(env.ClusterActivity.equals("Deploy")){
@@ -70,6 +71,28 @@ def buildCustomMySQLImage(){
              sh 'docker tag $IMAGE:$VERSION $LIMAGE:$VERSION'
              sh 'docker push $LIMAGE:$VERSION'
          
+          } else {
+            println("In DESTROY Stage you don't need to build a new Docker Image")
+          }
+
+       }
+   }
+}
+
+// Custom WordPress Docker Image Build
+def buildCustomWPImage(){
+    withEnv(['IMAGE=' + IMAGE, 'RepoImageName=' + LIMAGE, 'VERSION=' + VERSION, "WPImageNAME=" + WPImageNAME, 'DBHostName=' + "DBHostname.resulta-db.svc.local.cluster"]){
+       withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'mysqldbadmin', usernameVariable: 'DBUserName', passwordVariable: 'DBPassword']]){
+
+          if(env.ClusterActivity.equals("Deploy")){
+
+             sh script: 'sshpass -p ${Password} scp ${KubeConfigSafe}:~/wp-test-site.tar.gz .; tar -xvf wp-test-site.tar.gz'
+             sh returnStdout: true, script: "sed -i 's/dummyhost/${DBHostName}/g; s/dummyuser/${DBUserName}/g; s/dummypass/${DBPassword}/g' var/www/html/wp-config.php"
+
+             sh 'docker pull $WPImageNAME'
+             sh returnStdout: true, script: "docker build -t $LWPIMAGE:$VERSION -f Dockerfile-wp ."
+             sh 'docker push $LWPIMAGE:$VERSION'
+
           } else {
             println("In DESTROY Stage you don't need to build a new Docker Image")
           }
@@ -215,11 +238,12 @@ def destroyWPressApp(){
    }
 }
 
+// Build Custom MySQL Image Stage
 stage("Build MyQSL Image"){
     node("${env.NodeName}"){
     wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']){
 
-       echo '[Pipeline][INFO] Checkout Code from GitHub...'
+       echo '[Pipeline][INFO] Build MySQL Custom Image...'
        setCredentials()
        validateInputs()
        checkout scm
@@ -227,6 +251,23 @@ stage("Build MyQSL Image"){
        buildCustomMySQLImage()
 
        echo '\033[34mThis stage has built MariaDB image and pushed it to the DockerHub\033[0m'
+       }
+    }
+}
+
+//Stage to build Custom WordPress Image
+stage("Build WordPress Image"){
+    node("${env.NodeName}"){
+    wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']){
+
+       echo '[Pipeline][INFO] Build WordPress Custom Image...'
+       setCredentials()
+       validateInputs()
+       checkout scm
+
+       buildCustomWPImage()
+
+       echo '\033[34mThis stage has built WordPressB image and pushed it to the DockerHub\033[0m'
        }
     }
 }
