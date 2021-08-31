@@ -53,7 +53,7 @@ spec:
         tier: frontend
     spec:
       containers:
-      - image: wordpress:5.8-apache
+      - image: poyaskov/wp-mysql-db:0.2
         name: wordpress
         env:
         - name: WORDPRESS_DB_HOST
