@@ -72,6 +72,13 @@ spec:
         - mountPath: /var/www/html/wp-config.php
           name: wp-config
           subPath: wp-config.php
+        resources:
+          limits:
+            cpu: 250m
+            memory: 256Mi
+          requests:
+            cpu: 250m
+            memory: 256Mi
       volumes:
       - name: wordpress-persistent-storage
         persistentVolumeClaim:
@@ -79,3 +86,4 @@ spec:
       - name: wp-config
         configMap:
           name: wp-config
+

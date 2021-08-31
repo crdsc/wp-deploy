@@ -1,0 +1,15 @@
+ARG dummy_pass
+ARG dummy_image
+
+# FROM wordpress:5.8-apache
+FROM $dummy_image as builder
+
+ENV MYSQL_ROOT_PASSWORD=$dummy_pass
+
+COPY ./sql-scripts/ /docker-entrypoint-initdb.d/
+
+RUN ["/usr/local/bin/docker-entrypoint.sh", "mysqld", "--datadir", "/initialized-db", "--aria-log-dir-path", "/initialized-db"]
+
+FROM $dummy_image
+
+COPY --from=builder /initialized-db /var/lib/mysql
