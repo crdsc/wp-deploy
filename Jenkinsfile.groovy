@@ -104,7 +104,7 @@ def deployMySQLDB(){
        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'mysqldbadmin', usernameVariable: 'DBUserName', passwordVariable: 'DBPassword']]){
 
           ansiColor('vga') {
-              echo '\033[42m\033[97mDEPLOYING MySQL Instance with StorageClass ${storageClassName} \033[0m'
+              echo '\033[42m\033[97mDEPLOYING MySQL Instance with StorageClass:\033[0m' "${storageClassName}"
              
              if(NS_State.isEmpty()){
                   echo "Namespace  ${DB_Namespace} does not exist"
