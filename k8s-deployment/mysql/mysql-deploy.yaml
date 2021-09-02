@@ -65,7 +65,7 @@ metadata:
     app: mysql
 spec:
 #  storageClassName: gp2
-  storageClassName: px-db
+  storageClassName: dummysc
   accessModes:
     - ReadWriteOnce
   resources:
