@@ -104,7 +104,7 @@ def deployMySQLDB(){
        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'mysqldbadmin', usernameVariable: 'DBUserName', passwordVariable: 'DBPassword']]){
 
           ansiColor('vga') {
-              echo '\033[42m\033[97mDEPLOYING MySQL Instance with StorageClass ${storageClassName} \033[0m'
+              echo '\033[42m\033[97mDEPLOYING MySQL Instance with StorageClass:\033[0m' "${storageClassName}"
              
              if(NS_State.isEmpty()){
                   echo "Namespace  ${DB_Namespace} does not exist"
@@ -121,7 +121,7 @@ def deployMySQLDB(){
              }
 
              sh returnStdout: true, script: "sed -i 's/dummydbnamespace/${DB_Namespace}/g; s/dummysc/${storageClassName}/g' k8s-deployment/mysql/mysql-deploy.yaml"
-             sh returnStdout: true, script: 'kubectl -n $DB_Namespace apply -f k8s-deployment/mysql/mysql-deploy.yaml'
+             sh returnStdout: true, script: 'kubectl -n $DB_Namespace apply -f k8s-deployment/mysql/mysql-deploy.yaml || true'
              sh returnStdout: true, script: 'kubectl -n $DB_Namespace get pod -l app=mysql-wp|grep -v NAME | awk \'{ print $1 }\'| xargs -i kubectl -n $DB_Namespace delete pod {}'
 
              Pod_State = """${sh(
@@ -189,7 +189,7 @@ def deployWPressApp(){
           sh script: 'sshpass -p ${Password} scp ${KubeConfigSafe}:~/wp-config.php .'
           sh returnStdout: true, script: 'kubectl -n $App_Namespace create configmap wp-config --from-file=wp-config.php || true'
           sh returnStdout: true, script: "sed -i 's/dummyappnamespace/${App_Namespace}/g; s/dummydbnamespace/${DB_Namespace}/g; /storageClassName/ s/dummysc/${storageClassName}/g' k8s-deployment/wp-app/wordpress-deployment.yaml"
-          sh returnStdout: true, script: 'kubectl -n $App_Namespace apply -f k8s-deployment/wp-app/wordpress-deployment.yaml'
+          sh returnStdout: true, script: 'kubectl -n $App_Namespace apply -f k8s-deployment/wp-app/wordpress-deployment.yaml || true'
           sh returnStdout: true, script: 'kubectl -n $App_Namespace get pod -l app=wordpress|grep -v NAME | awk \'{ print $1 }\'| xargs -i kubectl -n $App_Namespace delete pod {}'
 
           sleep 30
