@@ -129,7 +129,7 @@ def destroyWPressApp(){
 
 // Create Private Key
 def CreatePrivateKey(){
-    withEnv(['IMAGE=' + IMAGE, 'RepoImageName=' + LIMAGE, 'VERSION=' + VERSION]){
+    withEnv(['RepoImageName=' + "Test" ]){
        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'mysqldbconnect', usernameVariable: 'DBUserName', passwordVariable: 'DBPassword']]){
 
           println("Creation a Private Key method")
@@ -155,25 +155,6 @@ stage("Create a Key"){
     }
 }
 
-//Stage to build Custom WordPress Image
-stage("Build WordPress Image"){
-    node("${env.NodeName}"){
-    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'Jenkins_KubeMaster', usernameVariable: 'UserName', passwordVariable: 'Password']]){
-       wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']){
-
-          echo '[Pipeline][INFO] Build WordPress Custom Image...'
-          setCredentials()
-          validateInputs()
-          checkout scm
-
-          buildCustomWPImage()
-
-          echo '\033[34mThis stage has built WordPressB image and pushed it to the DockerHub\033[0m'
-          }
-       }
-    }
-}
-
 // Stage to install and config  kubectl locally on the agent
 stage("Kubectl config"){
     node("${env.NodeName}"){
@@ -187,75 +168,5 @@ stage("Kubectl config"){
 
        }
     }
-}
-
-stage("MySQL DB Activity"){
-    node("${env.NodeName}"){
-    wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']){
-       withEnv(['KubeConfigSafe=' + KubeConfigSafe, 'RepoImageName=' + LIMAGE, 'VERSION=' + VERSION]){
-          withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'Jenkins_KubeMaster', usernameVariable: 'UserName', passwordVariable: 'Password']]){
-
-             setCredentials()
-             validateInputs()
-
-             echo '\033[34m[Pipeline][INFO] Deploy/Destroy MySQL(MariaDB) to the k8s Cluster...\033[0m'
-             sh 'mkdir -p ~/.kube/'
-             sh script: 'sshpass -p ${Password} scp ${KubeConfigSafe}:~/.kube/config ~/.kube/'
-
-             NS_State = """${sh(
-                returnStdout: true,
-                script: 'kubectl get ns $DB_Namespace 2>/dev/null || true'  
-             )}"""
-
-             println("NameSpace status:" + NS_State )
-
-             SECRET_STATE = """${sh(
-                returnStdout: true,
-                script: 'kubectl -n $DB_Namespace get secret mysql-wp-pass -o jsonpath={.data.password} 2>/dev/null || true'
-             )}"""
-
-             if(env.ClusterActivity.equals("Deploy")){
-                deployMySQLDB()
-                } else {
-                destroyMySQLDB()
-             }
-          }
-       }
-   }
-   }
-}
-
-stage("WPress App Activity"){
-    node("${env.NodeName}"){
-    wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']){
-       withEnv(['KubeConfigSafe=' + KubeConfigSafe, 'RepoImageName=' + LIMAGE, 'VERSION=' + VERSION]){
-          withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'Jenkins_KubeMaster', usernameVariable: 'UserName', passwordVariable: 'Password']]){
-
-             setCredentials()
-             validateInputs()
-
-             echo '\033[34m[Pipeline][INFO] Deploy/Destroy WordPress App on the k8s Cluster...\033[0m'
-
-             NS_State = """${sh(
-                returnStdout: true,
-                script: 'kubectl get ns $App_Namespace 2>/dev/null || true'
-             )}"""
-
-             println("WP App NameSpace status:" + NS_State )
-
-             SECRET_STATE = """${sh(
-                returnStdout: true,
-                script: 'kubectl -n $App_Namespace get secret mysql-wp-pass -o jsonpath={.data.password} 2>/dev/null || true'
-             )}"""
-
-             if(env.ClusterActivity.equals("Deploy")){
-                deployWPressApp()
-                } else {
-                destroyWPressApp()
-             }
-          }
-       }
-   }
-   }
 }
 
