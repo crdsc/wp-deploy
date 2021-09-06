@@ -134,26 +134,18 @@ def CreatePrivateKey(){
 
           println("Creation a Private Key method")
 
+          sh '''
+             mkdir -p tempo/$SA_Name
+             cd tempo/$SA_Name
+             ssh-keyget -t rsa -b 4096
+             ls -l
+
+          '''
+
        }
     }
 }
 
-// Build Custom MySQL Image Stage
-stage("Create a Key"){
-    node("${env.NodeName}"){
-    wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']){
-
-       echo '[Pipeline][INFO] Create Private Key Locally ...'
-       setCredentials()
-       validateInputs()
-       checkout scm
-              
-       CreatePrivateKey()
-
-       echo '\033[34mThis stage has built MariaDB image and pushed it to the DockerHub\033[0m'
-       }
-    }
-}
 
 // Stage to install and config  kubectl locally on the agent
 stage("Kubectl config"){
@@ -166,6 +158,23 @@ stage("Kubectl config"){
        sh script: 'sshpass -p ${Password} scp ${KubeConfigSafe}:~/.kube/config ~/.kube/'
        sh 'kubectl get nodes'
 
+       }
+    }
+}
+
+// Create private Key Stage
+stage("Create a Key"){
+    node("${env.NodeName}"){
+    wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']){
+
+       echo '[Pipeline][INFO] Create Private Key Locally ...'
+       setCredentials()
+       validateInputs()
+       checkout scm
+
+       CreatePrivateKey()
+
+       echo '\033[34mThis stage has built MariaDB image and pushed it to the DockerHub\033[0m'
        }
     }
 }
