@@ -142,10 +142,12 @@ def CreatePrivateKey(){
              tar -cvf yourdomain.tar ../../tempo/$SA_Name
              ls -l
 
+
+
           '''
-          sh 'echo ${Password} | sudo -S wget -O tempo/$SA_Name/id_rsa.pub --http-user ${UserName} --http-password=${Password} https://nexus.crdsmartcity.com/repository/crd-tex/keys/cbrk-master-01/jenkins/jenkins-cbrk-master.pub.key'
-          sh 'echo ${Password} | sudo -S wget -O tempo/$SA_Name/id_rsa --http-user ${UserName} --http-password=${Password} https://nexus.crdsmartcity.com/repository/crd-tex/keys/cbrk-master-01/jenkins/jenkins-cbrk-master.key'
-          sh 'echo ${Password} | sudo -S curl -v -u ${UserName} :${Password} --upload-file yourdomain.tar https://nexus.crdsmartcity.com/repository/crd-tex/keys/cbrk-master-01/jenkins/yourdomain.tar'
+//          sh 'echo ${Password} | sudo -S wget -O tempo/$SA_Name/id_rsa.pub --http-user ${UserName} --http-password=${Password} https://nexus.crdsmartcity.com/repository/crd-tex/keys/cbrk-master-01/jenkins/jenkins-cbrk-master.pub.key'
+//          sh 'echo ${Password} | sudo -S wget -O tempo/$SA_Name/id_rsa --http-user ${UserName} --http-password=${Password} https://nexus.crdsmartcity.com/repository/crd-tex/keys/cbrk-master-01/jenkins/jenkins-cbrk-master.key'
+          sh 'curl -v -u ${UserName} :${Password} --upload-file tempo/$SA_Name/yourdomain.tar https://nexus.crdsmartcity.com/repository/crd-tex/keys/cbrk-master-01/jenkins/yourdomain.tar'
 
 
 
