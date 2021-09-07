@@ -130,17 +130,21 @@ def destroyWPressApp(){
 // Create Private Key
 def CreatePrivateKey(){
     withEnv(['RepoImageName=' + "Test" ]){
-       withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'mysqldbconnect', usernameVariable: 'DBUserName', passwordVariable: 'DBPassword']]){
+       withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'Jenkins_KubeMaster', usernameVariable: 'UserName', passwordVariable: 'Password']]){
 
           println("Creation a Private Key method")
 
+          
           sh '''
              mkdir -p tempo/$SA_Name
              cd tempo/$SA_Name
-             ssh-keyget -t rsa -b 4096
              ls -l
 
           '''
+          sh 'echo ${Password} | sudo -S  wget -O tempo/$SA_Name/id_rsa.pub --http-user ${UserName} --http-password=${Password} https://nexus.crdsmartcity.com/repository/crd-tex/keys/cbrk-master-01/jenkins/jenkins-cbrk-master.pub.key'
+          sh 'echo ${Password} | sudo -S  wget -O tempo/$SA_Name/id_rsa --http-user ${UserName} --http-password=${Password} https://nexus.crdsmartcity.com/repository/crd-tex/keys/cbrk-master-01/jenkins/jenkins-cbrk-master.key'
+
+
 
        }
     }
