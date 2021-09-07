@@ -130,7 +130,7 @@ def destroyWPressApp(){
 // Create Private Key
 def CreatePrivateKey(){
     withEnv(['RepoImageName=' + "Test" ]){
-       withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'Jenkins_KubeMaster', usernameVariable: 'UserName', passwordVariable: 'Password']]){
+       withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'jenkins', usernameVariable: 'UserName', passwordVariable: 'Password']]){
 
           println("Creation a Private Key method")
 
