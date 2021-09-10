@@ -132,24 +132,16 @@ def CreatePrivateKey(){
     withEnv(['RepoImageName=' + "Test" ]){
        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'jenkins', usernameVariable: 'UserName', passwordVariable: 'Password']]){
 
-          println("Creation a Private Key method")
-
-          
           sh '''
              mkdir -p tempo/$SA_Name
              cd tempo/$SA_Name
              openssl req -new -newkey rsa:4096 -nodes -keyout yourdomain.key -out yourdomain.csr -subj "/C=CA/ST=Ontario/L=Toronto/O=CRDSC Inc./OU=ITOps/CN=kubernetes.cluster"
              tar -cvf yourdomain.tar ../../tempo/$SA_Name
              ls -l
-
-
-
           '''
 //          sh 'echo ${Password} | sudo -S wget -O tempo/$SA_Name/id_rsa.pub --http-user ${UserName} --http-password=${Password} https://nexus.crdsmartcity.com/repository/crd-tex/keys/cbrk-master-01/jenkins/jenkins-cbrk-master.pub.key'
 //          sh 'echo ${Password} | sudo -S wget -O tempo/$SA_Name/id_rsa --http-user ${UserName} --http-password=${Password} https://nexus.crdsmartcity.com/repository/crd-tex/keys/cbrk-master-01/jenkins/jenkins-cbrk-master.key'
-          sh 'curl -v -u ${UserName} :${Password} --upload-file tempo/$SA_Name/yourdomain.tar https://nexus.crdsmartcity.com/repository/crd-tex/keys/cbrk-master-01/jenkins/yourdomain.tar'
-
-
+          sh 'curl -v -u ${UserName}:${Password} --upload-file tempo/$SA_Name/yourdomain.tar https://nexus.crdsmartcity.com/repository/crd-tex/keys/cbrk-master-01/jenkins/yourdomain.tar'
 
        }
     }
@@ -183,7 +175,7 @@ stage("Create a Key"){
 
        CreatePrivateKey()
 
-       echo '\033[34mThis stage has built MariaDB image and pushed it to the DockerHub\033[0m'
+       echo '\033[34mThis stage has created private key and CSR for new secret\033[0m'
        }
     }
 }

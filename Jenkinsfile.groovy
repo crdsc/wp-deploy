@@ -277,10 +277,13 @@ stage("Kubectl config"){
     withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'Jenkins_KubeMaster', usernameVariable: 'UserName', passwordVariable: 'Password']]){
 
        echo '[Pipeline][INFO] Deploy kubectl and apply kubectl-config to the agent...'
-       sh 'echo ${Password} | sudo -S apt-get update -y && sudo apt-get install -y kubectl'
+       sh 'echo ${Password} | sudo -S apt-get update  && sudo -S apt-get install -y apt-transport-https ca-certificates curl'
+       sh 'echo ${Password} | sudo -S curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg'
+       sh 'echo ${Password} | echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo -S tee /etc/apt/sources.list.d/kubernetes.list'
+       sh 'echo ${Password} | sudo -S apt-get update  && sudo apt-get install -y kubectl'
        sh 'mkdir -p ~/.kube/'
        sh script: 'sshpass -p ${Password} scp ${KubeConfigSafe}:~/.kube/config ~/.kube/'
-       sh 'kubectl get nodes'
+       sh 'kubectl get nodes'       
 
        }
     }
